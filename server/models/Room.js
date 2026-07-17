@@ -1,5 +1,4 @@
 const { Schema, default: mongoose } = require("mongoose");
-
 const roomSchema = new Schema(
 {
     roomNumber: {

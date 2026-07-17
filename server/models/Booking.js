@@ -1,6 +1,5 @@
 const { Schema, default: mongoose } = require("mongoose");
 
-
 const bookingSchema = new Schema(
 {
 

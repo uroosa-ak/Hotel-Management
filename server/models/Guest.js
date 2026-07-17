@@ -1,5 +1,4 @@
 const { Schema, default: mongoose } = require("mongoose");
-
 const guestSchema = new Schema(
 {
     firstName: {

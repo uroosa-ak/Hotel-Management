@@ -1,6 +1,4 @@
 const { Schema, default: mongoose } = require("mongoose");
-
-
 const paymentSchema = new Schema(
 {
 
