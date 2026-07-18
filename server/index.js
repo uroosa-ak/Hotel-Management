@@ -8,6 +8,12 @@ const session = require("express-session");
 const app = express()
 ConnectDB();
 //Middelwear//
+app.use('/api/user',require ('./Routes/UserRoutes') )
+app.use('/api/service',require ('./Routes/ServiceRoutes') )
+app.use('/api/booking',require ('./Routes/BookingRoutes') )
+app.use('/api/rooms',require ('./Routes/RoomsRoutes') )
+app.use('/api/guest',require ('./Routes/GuestRoutes') )
+app.use('/api/payment',require ('./Routes/PaymentRoutes') )
 app.use(express.json());
 app.use(express.urlencoded({extented: false}));
 app.set("view engine","ejs");
