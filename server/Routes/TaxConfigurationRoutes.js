@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const taxController = require("../controllers/TaxConfigurationController");
+const taxController = require("../Controller/TaxConfigurationController");
 
 router.post("/", taxController.createTax);
 router.get("/", taxController.getAllTaxes);

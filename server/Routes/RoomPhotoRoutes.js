@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const roomPhotoController = require("../controllers/RoomPhotoController");
+const roomPhotoController = require("../Controller/RoomPhotoController");
 
 router.post("/", roomPhotoController.addPhoto);
 router.get("/", roomPhotoController.getAllPhotos);

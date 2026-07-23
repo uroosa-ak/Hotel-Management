@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const loyaltyController = require("../controllers/LoyaltyProgramController");
+const loyaltyController = require("../Controller/LoyaltyProgramController");
 
 router.post("/", loyaltyController.createLoyalty);
 router.get("/", loyaltyController.getAllLoyalty);

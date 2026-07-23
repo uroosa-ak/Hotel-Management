@@ -60,6 +60,7 @@ const userController = {
         process.env.JWT_SECRET,
         { expiresIn: "1d" }
       );
+      res.cookie("token",token)
 
       return res.json({ message: "Login successful", status: true, user: existingUser, token });
 
