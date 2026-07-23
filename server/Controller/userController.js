@@ -72,7 +72,19 @@ const userController = {
   // Get all users
   getUsers: async (req, res) => {
     try {
-      const users = await User.find();
+      const users = await User.find({});
+      if (users.length>0) {
+         return res.json({
+          message: "user get successfully",
+          status: true,
+          users
+        })
+      } else {
+         res.json({
+          message: " no user  in DB",
+          status: false
+        })
+      }
       res.json(users);
     } catch (error) {
       res.status(500).json({ message: error.message });
