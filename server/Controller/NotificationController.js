@@ -19,3 +19,23 @@ exports.getNotifications = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Update notification
+exports.updateNotification = async (req, res) => {
+  try {
+    const updated = await Notification.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete notification
+exports.deleteNotification = async (req, res) => {
+  try {
+    await Notification.findByIdAndDelete(req.params.id);
+    res.json({ message: "Notification deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
