@@ -6,15 +6,18 @@ const dotenv = require('dotenv');
 const ConnectDB = require('./config/db');
 const session = require('express-session');
 dotenv.config();
+// Connect to MongoDB
+ConnectDB();
 
 const app = express();
+const cookieparser= require("cookie parser")
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieparser())
 
-// Connect to MongoDB
-ConnectDB();
+
 
 // Session setup
 app.use(

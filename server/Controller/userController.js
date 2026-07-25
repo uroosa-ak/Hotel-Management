@@ -91,11 +91,25 @@ const userController = {
     }
   },
 
-  // Get user by ID
+
+  // Get user-profile by ID
   getUserById: async (req, res) => {
     try {
-      const user = await User.findById(req.params.id);
-      res.json(user);
+      let userId=req.User.id
+      const user = await User.findOne({_id:userId});
+      if (user) {
+         return res.json({
+          message: " user get successfully",
+          status: true,
+          user
+        })
+      } else {
+           return res.json({
+          message: " no user  in DB",
+          status: false
+        })
+      }
+     
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
