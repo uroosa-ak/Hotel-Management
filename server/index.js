@@ -10,7 +10,7 @@ dotenv.config();
 ConnectDB();
 
 const app = express();
-const cookieparser= require("cookie parser")
+const cookieparser= require("cookie-parser")
 
 // Middleware
 app.use(express.json());
@@ -55,4 +55,4 @@ app.get('/', (req, res) => {
 
 // Start server
 const port = process.env.PORT || 5000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
