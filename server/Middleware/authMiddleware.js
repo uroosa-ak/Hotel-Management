@@ -1,9 +1,9 @@
-
+const jwt=require("jsonwebtoken")
 const authMiddleware = async (req,res,next)=>{
     try {
         let token= req.cookies.token 
         if (token) {
-            let decodeduser =  await just.verify(token,proccess.env.JWTSECRET)
+            let decodeduser =  await jwt.verify(token,process.env.JWT_SECRET)
             req.user= decodeduser
             next()
         } else {

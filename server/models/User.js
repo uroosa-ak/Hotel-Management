@@ -16,7 +16,7 @@ password:{
 },
 role:{
     type:String,
-    enum:["manager",'housekeeping','guest'],
+    enum:["admin","manager",'housekeeping','guest'],
     default:"guest"
 },
 contact:{

@@ -48,6 +48,7 @@ app.use('/api/notifications', require('./Routes/NotificationRoutes'));
 app.use('/api/inventory', require('./Routes/InventoryRoutes'));
 app.use('/api/auth', require('./Routes/AuthRoutes'));
 
+
 // Test route
 app.get('/', (req, res) => {
   res.send('Hello World!');
