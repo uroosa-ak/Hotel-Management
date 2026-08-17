@@ -18,7 +18,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieparser())
 
 
-
 // Session setup
 app.use(
   session({
@@ -47,6 +46,7 @@ app.use('/api/eventbookings', require('./Routes/EventBookingRoutes'));
 app.use('/api/notifications', require('./Routes/NotificationRoutes'));
 app.use('/api/inventory', require('./Routes/InventoryRoutes'));
 app.use('/api/auth', require('./Routes/AuthRoutes'));
+
 
 
 // Test route

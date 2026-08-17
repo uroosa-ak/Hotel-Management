@@ -30,7 +30,9 @@ import {
   LuHotel as Hotel,
   LuCheck as Check,
   LuArrowLeft as ArrowLeft,
-  LuAlertTriangle as AlertTriangle,
+  LuTriangleAlert as AlertTriangle,
+  LuSlidersHorizontal as SlidersHorizontal,
+  LuMessageSquare as MessageSquare,
   LuPackage as Package,
   LuDollarSign as DollarSign,
   LuMaximize as Maximize,
@@ -104,4 +106,6 @@ export {
   Settings,
   TrendingUp,
   Bed,
+  SlidersHorizontal,
+  MessageSquare,
 };
