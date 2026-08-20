@@ -27,7 +27,11 @@ age:{
     type:Number,
     default:0
     
-}
+},
+imgUrl:{
+type:String,
+default:"",
+},
 
 })
 module.exports = mongoose.model("user",userSchema)

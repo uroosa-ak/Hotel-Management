@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { image } = require("../config/cloudnary");
 
 const userController = {
 
@@ -132,6 +133,43 @@ const userController = {
       res.json({ message: "User deleted" });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  },
+  //uploadImage
+  uploadImage:async(req,res)=>{
+    try {
+       const{id}=req.params;
+       if (!req.file) {
+        return res.status(400).json({
+          status:false,
+          message:"please upload an image",
+        });
+        
+       } 
+       const result  = await new  Promise((resolve,reject)=>{
+      const stream = cloudinary.uploader.upload_stream({folder:"profile_images",},
+        (error,result)=>{
+if (error)
+  return reject(error);
+resolve(result);
+  
+}
+      );
+streamifier.createReadStream(req.file.buffer).pipe(stream);
+        });
+        const user = await User.findByIdAndUpdate(id,{imgUrl:result.secure_url},{new:true});
+        res.status(200).json({status:true,message:"image uplaoded successfully",
+          image:result.secure_url,
+          user,
+        });
+       
+    } catch ( error
+
+    ) {
+      res.status(500).json({
+        status: false,
+        meassage: error.meassage,
+      });
     }
   }
 
