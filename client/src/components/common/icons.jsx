@@ -52,6 +52,10 @@ import {
   LuSettings as Settings,
   LuTrendingUp as TrendingUp,
   LuBed as Bed,
+  LuArrowRight as ArrowRight,
+  LuShieldCheck as ShieldCheck,
+  LuPrinter as Printer,
+  LuWrench as Wrench,
 } from 'react-icons/lu';
 
 export {
@@ -108,4 +112,8 @@ export {
   Bed,
   SlidersHorizontal,
   MessageSquare,
+  ArrowRight,
+  ShieldCheck,
+  Printer,
+  Wrench,
 };

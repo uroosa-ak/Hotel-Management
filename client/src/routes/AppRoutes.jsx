@@ -28,6 +28,8 @@ import AdminDashboard from '../pages/Admin/AdminDashboard';
 import AdminRooms from '../pages/Admin/AdminRooms';
 import AdminBookings from '../pages/Admin/AdminBookings';
 import AdminUsers from '../pages/Admin/AdminUsers';
+import AdminCheckInOut from '../pages/Admin/AdminCheckInOut';
+import AdminHousekeeping from '../pages/Admin/AdminHousekeeping';
 
 const AppRoutes = () => {
   return (
@@ -56,8 +58,10 @@ const AppRoutes = () => {
       <Route path="/admin" element={<AdminRoute />}>
         <Route element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path="check-in-out" element={<AdminCheckInOut />} />
           <Route path="rooms" element={<AdminRooms />} />
           <Route path="bookings" element={<AdminBookings />} />
+          <Route path="housekeeping" element={<AdminHousekeeping />} />
           <Route path="users" element={<AdminUsers />} />
         </Route>
       </Route>

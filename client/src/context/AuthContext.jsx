@@ -91,7 +91,11 @@ export const AuthProvider = ({ children }) => {
     updateUser,
     loading,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin' || user?.isAdmin === true,
+    isAdmin: user?.role === 'admin',
+    isManager: user?.role === 'manager' || user?.role === 'admin',
+    isReceptionist: user?.role === 'receptionist' || user?.role === 'admin',
+    isHousekeeping: user?.role === 'housekeeping' || user?.role === 'admin',
+    isStaff: ['admin', 'manager', 'receptionist', 'housekeeping'].includes(user?.role),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

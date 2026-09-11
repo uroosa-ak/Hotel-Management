@@ -3,19 +3,24 @@
 // Imports
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors');
 const ConnectDB = require('./config/db');
 const session = require('express-session');
+const cookieparser = require('cookie-parser');
+
 dotenv.config();
-// Connect to MongoDB
 ConnectDB();
 
 const app = express();
-const cookieparser= require("cookie-parser")
 
-// Middleware
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieparser())
+app.use(cookieparser());
 
 
 // Session setup

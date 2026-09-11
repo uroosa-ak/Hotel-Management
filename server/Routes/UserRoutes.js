@@ -1,20 +1,21 @@
-const express = require ("express");
-const routes = express.Router();
-const User = require("../models/User");
-const upload= require("../Middleware/upload");
-// IMPORT the controller
+const express = require("express");
+const router = express.Router();
 const userController = require("../Controller/userController");
 const authMiddleware = require("../Middleware/authMiddleware");
-routes.get("/all",authMiddleware, userController.getUsers)
-routes.get("/profile",authMiddleware, userController.getUserById)
-routes.put("/updateUser",authMiddleware, userController.updateUser)
-routes.delete("/deleteUser/:id",authMiddleware, userController.deleteUser)
-routes.post("/register",userController.register)
-routes.post("/login",userController.login)
-routes.put("/upload/:id",upload.single("image"),userController.uploadImage);
+const { authorizeRoles } = require("../Middleware/roleMiddleware");
 
+// Public Auth Endpoints
+router.post("/register", userController.register);
+router.post("/login", userController.login);
 
+// Authenticated User Endpoints
+router.get("/profile", authMiddleware, userController.getProfile);
+router.put("/profile", authMiddleware, userController.updateUser);
 
+// Staff & User Management (Admin & Manager only)
+router.get("/all", authMiddleware, authorizeRoles("admin", "manager"), userController.getUsers);
+router.put("/:id", authMiddleware, authorizeRoles("admin", "manager"), userController.updateUser);
+router.patch("/:id/toggle-status", authMiddleware, authorizeRoles("admin", "manager"), userController.toggleUserStatus);
+router.delete("/:id", authMiddleware, authorizeRoles("admin"), userController.deleteUser);
 
-
-module.exports = routes
+module.exports = router;

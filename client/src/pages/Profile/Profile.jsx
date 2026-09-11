@@ -94,7 +94,7 @@ const Profile = () => {
             <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
               <span className="flex items-center gap-1.5">
                 <Shield size={14} className="text-amber-500" />
-                Grand Hotel Loyalty Member
+                LuxuryStay Loyalty Member
               </span>
               <span>&bull;</span>
               <span>Joined 2025</span>

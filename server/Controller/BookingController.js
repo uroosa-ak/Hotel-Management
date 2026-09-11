@@ -158,16 +158,27 @@ exports.deleteBooking = async (req, res) => {
 exports.updateBookingStatus = async (req, res) => {
     try {
         const { status } = req.body;
-        const updated = await Booking.findByIdAndUpdate(
-            req.params.id,
-            { bookingStatus: status },
-            { new: true }
-        ).populate('guest room');
-
-        if (!updated) {
+        const normalized = status ? status.toLowerCase() : 'pending';
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
         }
-        res.json(mapBookingToClient(updated));
+
+        booking.bookingStatus = normalized;
+        await booking.save();
+
+        if (booking.room) {
+            if (normalized === 'checked-in' || normalized === 'checked_in') {
+                await Room.findByIdAndUpdate(booking.room, { status: 'occupied', availability: false });
+            } else if (normalized === 'checked-out' || normalized === 'checked_out') {
+                await Room.findByIdAndUpdate(booking.room, { status: 'cleaning', availability: false });
+            } else if (normalized === 'cancelled') {
+                await Room.findByIdAndUpdate(booking.room, { status: 'available', availability: true });
+            }
+        }
+
+        const populated = await Booking.findById(booking._id).populate('guest room');
+        res.json(mapBookingToClient(populated));
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -185,7 +196,7 @@ exports.cancelBooking = async (req, res) => {
         await booking.save();
 
         if (booking.room) {
-            await Room.findByIdAndUpdate(booking.room, { status: 'available' });
+            await Room.findByIdAndUpdate(booking.room, { status: 'available', availability: true });
         }
 
         const populated = await Booking.findById(booking._id).populate('guest room');
@@ -218,7 +229,12 @@ exports.getUserBookings = async (req, res) => {
 // Get current logged-in user's bookings (my bookings)
 exports.getMyBookings = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const userId = req.user?._id || req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
+
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }

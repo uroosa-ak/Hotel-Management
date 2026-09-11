@@ -13,7 +13,7 @@ import {
 } from '../common/icons';
 
 const Navbar = () => {
-  const { user, logout, isAuthenticated, isAdmin } = useAuth();
+  const { user, logout, isAuthenticated, isAdmin, isStaff } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,10 +56,10 @@ const Navbar = () => {
             </div>
             <div>
               <span className="text-xl font-bold tracking-wider text-white uppercase font-serif">
-                Grand Hotel
+                LuxuryStay
               </span>
               <span className="block text-[10px] tracking-widest text-amber-400 uppercase font-semibold">
-                Resort & Spa
+                Hospitality
               </span>
             </div>
           </Link>
@@ -100,13 +100,13 @@ const Navbar = () => {
                   </Link>
                 ))}
 
-                {isAdmin && (
+                {(isAdmin || isStaff) && (
                   <Link
                     to="/admin"
                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors"
                   >
                     <LayoutDashboard size={16} />
-                    <span>Admin Panel</span>
+                    <span>Staff Portal</span>
                   </Link>
                 )}
 
@@ -189,14 +189,14 @@ const Navbar = () => {
                     <span>{link.label}</span>
                   </Link>
                 ))}
-                {isAdmin && (
+                {(isAdmin || isStaff) && (
                   <Link
                     to="/admin"
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-amber-400 bg-amber-500/10 border border-amber-500/20 font-medium"
                   >
                     <LayoutDashboard size={18} />
-                    <span>Admin Panel</span>
+                    <span>Staff Portal</span>
                   </Link>
                 )}
                 <button

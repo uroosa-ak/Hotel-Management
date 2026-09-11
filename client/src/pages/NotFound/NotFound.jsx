@@ -20,7 +20,7 @@ const NotFound = () => {
             className="btn-accent inline-flex items-center gap-2 text-xs font-semibold px-6 py-3"
           >
             <ArrowLeft size={16} />
-            <span>Return to Grand Hotel Home</span>
+            <span>Return to LuxuryStay Home</span>
           </Link>
         </div>
       </div>

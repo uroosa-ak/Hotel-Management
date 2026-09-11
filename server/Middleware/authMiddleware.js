@@ -1,25 +1,33 @@
-const jwt=require("jsonwebtoken")
-const authMiddleware = async (req,res,next)=>{
-    try {
-        let token = req.cookies.token;
-        if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
-            token = req.headers.authorization.split(" ")[1];
-        }
-        
-        if (token) {
-            let decodeduser =  await jwt.verify(token,process.env.JWT_SECRET)
-            req.user= decodeduser
-            next()
-        } else {
-            res.json({
-                message:"unauthorized user",status:false
-            })
-        }
-    } catch (error) {
-         res.json({
-                message:error.message,
-                status:false
-            })
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+
+const authMiddleware = async (req, res, next) => {
+  try {
+    let token = req.cookies?.token;
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
     }
-}
-module.exports= authMiddleware;
+
+    if (!token) {
+      return res.status(401).json({ message: "Access token required" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
+
+    if (!user) {
+      return res.status(401).json({ message: "User account not found" });
+    }
+
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Account has been deactivated. Please contact administration." });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+module.exports = authMiddleware;

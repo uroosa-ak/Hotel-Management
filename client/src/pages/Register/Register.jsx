@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, User, Phone, Hotel } from '../../components/common/icons';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { validateEmail, validatePassword, validatePhone } from '../../utils/validators';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,7 @@ const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'user',
+    role: 'guest',
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -27,8 +28,16 @@ const Register = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email address is required';
-    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) newErrors.email = emailErr;
+
+    const phoneErr = validatePhone(formData.phone);
+    if (phoneErr) newErrors.phone = phoneErr;
+
+    const passErr = validatePassword(formData.password);
+    if (passErr) newErrors.password = passErr;
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
@@ -64,7 +73,7 @@ const Register = () => {
             Create Your Account
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
-            Join Grand Hotel for member-only privileges and instant booking management
+            Join LuxuryStay Hospitality for exceptional service and member rewards
           </p>
         </div>
 

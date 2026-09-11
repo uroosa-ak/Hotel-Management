@@ -11,6 +11,8 @@ import {
   X,
   ArrowLeft,
   Shield,
+  Sparkles,
+  CheckCircle,
 } from '../components/common/icons';
 
 const AdminLayout = () => {
@@ -20,9 +22,11 @@ const AdminLayout = () => {
 
   const navItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/admin/rooms', icon: BedDouble, label: 'Manage Rooms' },
-    { path: '/admin/bookings', icon: CalendarDays, label: 'Bookings' },
-    { path: '/admin/users', icon: Users, label: 'User Directory' },
+    { path: '/admin/check-in-out', icon: CheckCircle, label: 'Front Desk / Check-In' },
+    { path: '/admin/rooms', icon: BedDouble, label: 'Manage Suites' },
+    { path: '/admin/bookings', icon: CalendarDays, label: 'Reservations' },
+    { path: '/admin/housekeeping', icon: Sparkles, label: 'Housekeeping' },
+    { path: '/admin/users', icon: Users, label: 'Staff & Guests' },
   ];
 
   const isActive = (path) => {
@@ -36,7 +40,7 @@ const AdminLayout = () => {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-slate-900 text-white px-4 h-16 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-2">
           <BedDouble className="text-amber-400" size={22} />
-          <span className="font-bold text-sm uppercase tracking-wider">Grand Hotel Admin</span>
+          <span className="font-bold text-sm uppercase tracking-wider">LuxuryStay Management</span>
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -61,9 +65,9 @@ const AdminLayout = () => {
               </div>
               <div>
                 <h2 className="text-base font-bold text-white uppercase tracking-wider">
-                  Admin Portal
+                  Staff Portal
                 </h2>
-                <p className="text-[10px] text-amber-400 font-medium">Grand Hotel Systems</p>
+                <p className="text-[10px] text-amber-400 font-medium">LuxuryStay Hospitality</p>
               </div>
             </Link>
             <button

@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, Hotel, Shield } from '../../components/common/icons';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
+import { validateEmail } from '../../utils/validators';
+
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -19,12 +21,19 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) {
+      setError(emailErr);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await login(formData);
-      // If admin, go to /admin by default if no prior route was requested
-      if (res?.user?.role === 'admin' && from === '/') {
+      const userRole = res?.user?.role || res?.role;
+      if (['admin', 'manager', 'receptionist', 'housekeeping'].includes(userRole) && from === '/') {
         navigate('/admin', { replace: true });
       } else {
         navigate(from, { replace: true });
@@ -38,9 +47,11 @@ const Login = () => {
 
   const handleQuickDemo = (role) => {
     if (role === 'admin') {
-      setFormData({ email: 'admin@grandhotel.com', password: 'adminpassword123' });
+      setFormData({ email: 'admin@luxurystay.com', password: 'AdminPassword123!' });
+    } else if (role === 'receptionist') {
+      setFormData({ email: 'reception@luxurystay.com', password: 'StaffPassword123!' });
     } else {
-      setFormData({ email: 'guest@grandhotel.com', password: 'guestpassword123' });
+      setFormData({ email: 'guest@luxurystay.com', password: 'GuestPassword123!' });
     }
   };
 
@@ -129,14 +140,21 @@ const Login = () => {
                 onClick={() => handleQuickDemo('guest')}
                 className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-medium transition-colors cursor-pointer"
               >
-                Guest Demo
+                Guest
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickDemo('receptionist')}
+                className="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer border border-blue-200"
+              >
+                Receptionist
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickDemo('admin')}
                 className="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer border border-amber-200"
               >
-                Admin Demo
+                Admin
               </button>
             </div>
           </div>

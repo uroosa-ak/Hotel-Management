@@ -49,10 +49,10 @@ const Footer = () => {
               </div>
               <div>
                 <span className="text-lg font-bold tracking-wider text-white uppercase font-serif">
-                  Grand Hotel
+                  LuxuryStay
                 </span>
                 <span className="block text-[9px] tracking-widest text-amber-400 uppercase font-semibold">
-                  Resort & Spa
+                  Hospitality
                 </span>
               </div>
             </div>

@@ -3,8 +3,6 @@ import AppRoutes from './routes/AppRoutes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import QrScanner from './components/QrScanner';
-
 function App() {
   return (
     <>
@@ -22,9 +20,7 @@ function App() {
         pauseOnHover
         theme="colored"
       />
-        <QrScanner />
     </>
-    
   );
 }
 
