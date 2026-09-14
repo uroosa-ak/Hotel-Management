@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { User, Mail, Phone, Lock, CheckCircle, Shield } from '../../components/common/icons';
 import userService from '../../services/userService';
+import { validatePassword } from '../../utils/validators';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 
@@ -43,8 +44,9 @@ const Profile = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    if (passwordData.newPassword.length < 6) {
-      setPasswordMsg({ type: 'error', text: 'New password must be at least 6 characters' });
+    const passwordError = validatePassword(passwordData.newPassword);
+    if (passwordError) {
+      setPasswordMsg({ type: 'error', text: passwordError });
       return;
     }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -66,7 +68,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen py-10">
+    <div className="app-shell bg-background min-h-screen py-10">
       <div className="page-container max-w-4xl">
         <PageHeader
           title="Account Settings"
@@ -227,7 +229,7 @@ const Profile = () => {
                 <input
                   type="password"
                   required
-                  placeholder="Min 6 characters"
+                  placeholder="Min 8 characters, with upper/lower/number/symbol"
                   className="input-field"
                   value={passwordData.newPassword}
                   onChange={(e) =>

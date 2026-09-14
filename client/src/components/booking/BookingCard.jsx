@@ -5,9 +5,7 @@ import StatusBadge from '../common/StatusBadge';
 
 const BookingCard = ({ booking, onCancel, showActions = true }) => {
   const room = booking.room;
-  const imageUrl =
-    room?.images?.[0] ||
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop';
+  const imageUrl = room?.images?.[0] || '/images/rooms/room-01.jpg';
 
   const formatDate = (dateString) => {
     if (!dateString) return '--';
@@ -104,7 +102,7 @@ const BookingCard = ({ booking, onCancel, showActions = true }) => {
 
               {showActions &&
                 booking.status !== 'cancelled' &&
-                booking.status !== 'checked_out' && (
+                booking.status !== 'checked-out' && (
                   <button
                     onClick={() => onCancel?.(booking._id)}
                     className="px-3 py-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors cursor-pointer"

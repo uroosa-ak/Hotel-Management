@@ -5,7 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // public/wp-mirror holds the template's vendored WordPress/jQuery bundles and
+  // tests/ holds Playwright scripts that run under Node, not the browser.
+  globalIgnores(['dist', 'public/wp-mirror', 'tests']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [

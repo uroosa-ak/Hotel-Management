@@ -1,17 +1,45 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import Navbar from '../components/navbar/Navbar';
-import Footer from '../components/footer/Footer';
+import { Outlet, useLocation } from 'react-router-dom';
+import LuxuryTopBar from '../components/common/LuxuryTopBar';
+import TemplateHeader from '../components/template/TemplateHeader';
+import TemplateFooter from '../components/template/TemplateFooter';
+
+const MOTELA_EXACT_PATHS = [
+  '/',
+  '/rooms',
+  '/about',
+  '/prices',
+  '/services',
+  '/contact',
+  '/coming-soon',
+  '/shop',
+  '/blog',
+];
+
+const isMotelaThemePage = (pathname) => {
+  if (MOTELA_EXACT_PATHS.includes(pathname)) return true;
+  // Match dynamic routes like /rooms/single-room, /blog/post-1, /shop/product-1
+  if (pathname.startsWith('/shop/') || pathname.startsWith('/blog/')) {
+    return true;
+  }
+  if (pathname.startsWith('/rooms/')) {
+    return true;
+  }
+  return false;
+};
 
 const MainLayout = () => {
+  const location = useLocation();
+  const isMotela = isMotelaThemePage(location.pathname);
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-amber-500 selection:text-white">
-      <Navbar />
-      <main className="flex-grow">
+    <>
+      <LuxuryTopBar />
+      {!isMotela && <TemplateHeader />}
+      <main>
         <Outlet />
       </main>
-      <Footer />
-    </div>
+      {!isMotela && <TemplateFooter />}
+    </>
   );
 };
 

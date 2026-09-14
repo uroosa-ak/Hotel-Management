@@ -182,9 +182,9 @@ const AdminUsers = () => {
         title="Delete User Account"
         message="Are you sure you want to permanently delete this user account? This action cannot be undone."
         confirmText="Yes, Delete"
-        confirmVariant="danger"
+        variant="danger"
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteModal({ isOpen: false, userId: null })}
+        onClose={() => setDeleteModal({ isOpen: false, userId: null })}
       />
     </div>
   );

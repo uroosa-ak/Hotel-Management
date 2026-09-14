@@ -14,15 +14,22 @@ import {
 import roomService from '../../services/roomService';
 import bookingService from '../../services/bookingService';
 import userService from '../../services/userService';
+import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
   const [rooms, setRooms] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Housekeeping may only see rooms; asking for bookings or the user directory
+  // would just come back 403.
+  const canSeeBookings = ['admin', 'manager', 'receptionist'].includes(user?.role);
+  const canSeeUsers = ['admin', 'manager'].includes(user?.role);
 
   useEffect(() => {
     let isMounted = true;
@@ -30,8 +37,8 @@ const AdminDashboard = () => {
       try {
         const [roomsData, bookingsData, usersData] = await Promise.allSettled([
           roomService.getAll(),
-          bookingService.getAll(),
-          userService.getAll(),
+          canSeeBookings ? bookingService.getAll() : Promise.resolve([]),
+          canSeeUsers ? userService.getAll() : Promise.resolve([]),
         ]);
 
         if (isMounted) {
@@ -49,7 +56,7 @@ const AdminDashboard = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [canSeeBookings, canSeeUsers]);
 
   if (loading) return <LoadingSpinner fullScreen text="Loading administrative dashboard..." />;
 
@@ -61,19 +68,19 @@ const AdminDashboard = () => {
 
   const occupancyRate = rooms.length > 0
     ? Math.round(((rooms.length - availableRoomsCount) / rooms.length) * 100)
-    : 45;
+    : 0;
 
   const stats = [
     {
       title: 'Total Revenue',
-      value: `$${totalRevenue > 0 ? totalRevenue.toLocaleString() : '14,850'}`,
-      change: '+18.4% this quarter',
+      value: `$${totalRevenue.toLocaleString()}`,
+      change: `${bookings.length} bookings to date`,
       icon: DollarSign,
       color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
     },
     {
       title: 'Total Bookings',
-      value: bookings.length > 0 ? bookings.length : 24,
+      value: bookings.length,
       change: 'Active guest stays',
       icon: CalendarDays,
       color: 'text-amber-600 bg-amber-50 border-amber-100',
@@ -87,14 +94,31 @@ const AdminDashboard = () => {
     },
     {
       title: 'Registered Users',
-      value: users.length > 0 ? users.length : 18,
+      value: users.length,
       change: 'Guests & staff directory',
       icon: Users,
       color: 'text-purple-600 bg-purple-50 border-purple-100',
     },
   ];
 
-  // Apache ECharts: Revenue Trend Area Chart
+  // Revenue by month, derived from actual booking creation dates (last 6 months).
+  const monthLabels = [];
+  const monthKeys = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i -= 1) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    monthKeys.push(`${d.getFullYear()}-${d.getMonth()}`);
+    monthLabels.push(d.toLocaleString('en-US', { month: 'short' }));
+  }
+  const revenueByMonth = monthKeys.map((key) =>
+    bookings.reduce((sum, b) => {
+      if (!b.createdAt) return sum;
+      const d = new Date(b.createdAt);
+      return `${d.getFullYear()}-${d.getMonth()}` === key ? sum + (b.totalAmount || 0) : sum;
+    }, 0)
+  );
+
+  // Apache ECharts: Revenue Trend Area Chart (real data, last 6 months)
   const revenueChartOption = {
     tooltip: {
       trigger: 'axis',
@@ -110,7 +134,7 @@ const AdminDashboard = () => {
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      data: monthLabels,
       axisLine: { lineStyle: { color: '#94a3b8' } },
     },
     yAxis: {
@@ -123,7 +147,7 @@ const AdminDashboard = () => {
         name: 'Revenue',
         type: 'line',
         smooth: true,
-        data: [7200, 8400, 9100, 11200, 10500, 13400, 14200, 16100, 15300, 17800, 19200, 21500],
+        data: revenueByMonth,
         itemStyle: { color: '#d97706' },
         areaStyle: {
           color: {
@@ -168,10 +192,10 @@ const AdminDashboard = () => {
         },
         label: { show: false },
         data: [
-          { value: availableRoomsCount || 12, name: 'Available', itemStyle: { color: '#10b981' } },
-          { value: occupiedCount || 8, name: 'Occupied', itemStyle: { color: '#3b82f6' } },
-          { value: cleaningCount || 3, name: 'Cleaning', itemStyle: { color: '#f59e0b' } },
-          { value: maintenanceCount || 1, name: 'Maintenance', itemStyle: { color: '#ef4444' } },
+          { value: availableRoomsCount, name: 'Available', itemStyle: { color: '#10b981' } },
+          { value: occupiedCount, name: 'Occupied', itemStyle: { color: '#3b82f6' } },
+          { value: cleaningCount, name: 'Cleaning', itemStyle: { color: '#f59e0b' } },
+          { value: maintenanceCount, name: 'Maintenance', itemStyle: { color: '#ef4444' } },
         ],
       },
     ],

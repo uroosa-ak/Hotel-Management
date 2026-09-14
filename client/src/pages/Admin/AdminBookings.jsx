@@ -67,7 +67,7 @@ const AdminBookings = () => {
 
       {/* Filter tabs */}
       <div className="flex gap-2 border-b border-slate-200 pb-3 overflow-x-auto">
-        {['all', 'confirmed', 'checked_in', 'checked_out', 'pending', 'cancelled'].map((tab) => (
+        {['all', 'confirmed', 'checked-in', 'checked-out', 'pending', 'cancelled'].map((tab) => (
           <button
             key={tab}
             onClick={() => setFilter(tab)}
@@ -77,7 +77,7 @@ const AdminBookings = () => {
                 : 'text-slate-600 hover:bg-slate-200/60'
             }`}
           >
-            {tab.replace(/_/g, ' ')}
+            {tab.replace(/-/g, ' ')}
           </button>
         ))}
       </div>
@@ -143,8 +143,8 @@ const AdminBookings = () => {
                         >
                           <option value="pending">Pending</option>
                           <option value="confirmed">Confirmed</option>
-                          <option value="checked_in">Checked In</option>
-                          <option value="checked_out">Checked Out</option>
+                          <option value="checked-in">Checked In</option>
+                          <option value="checked-out">Checked Out</option>
                           <option value="cancelled">Cancelled</option>
                         </select>
                         <button

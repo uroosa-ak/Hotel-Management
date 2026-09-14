@@ -12,6 +12,16 @@ const userService = {
     return data;
   },
 
+  updateProfile: async (profileData) => {
+    const { data } = await api.put('/user/profile', profileData);
+    return data;
+  },
+
+  changePassword: async (passwordData) => {
+    const { data } = await api.put('/user/change-password', passwordData);
+    return data;
+  },
+
   updateUser: async (id, updateData) => {
     const { data } = await api.put(`/user/${id}`, updateData);
     return data;

@@ -25,7 +25,7 @@ const AdminRooms = () => {
     isAvailable: true,
     description: '',
     amenities: 'Wi-Fi, Balcony, Mini Bar, Smart TV',
-    images: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop',
+    images: '/images/rooms/room-01.jpg',
   });
 
   // Delete dialog state
@@ -60,7 +60,7 @@ const AdminRooms = () => {
       isAvailable: true,
       description: 'Spacious suite with luxury bedding and amenities.',
       amenities: 'High-speed Wi-Fi, Balcony, Mini Bar, Smart TV, Room Service',
-      images: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop',
+      images: '/images/rooms/room-01.jpg',
     });
     setModalOpen(true);
   };
@@ -150,10 +150,7 @@ const AdminRooms = () => {
                   <tr key={room._id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-semibold text-slate-900 flex items-center gap-3">
                       <img
-                        src={
-                          room.images?.[0] ||
-                          'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=100&auto=format&fit=crop'
-                        }
+                        src={room.images?.[0] || '/images/rooms/room-01.jpg'}
                         alt=""
                         className="w-10 h-10 rounded-lg object-cover"
                       />

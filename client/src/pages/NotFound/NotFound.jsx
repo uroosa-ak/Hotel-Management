@@ -4,7 +4,7 @@ import { BedDouble, ArrowLeft } from '../../components/common/icons';
 
 const NotFound = () => {
   return (
-    <div className="min-h-[75vh] flex items-center justify-center bg-slate-50 py-16 px-4">
+    <div className="app-shell min-h-[75vh] flex items-center justify-center bg-background py-16 px-4">
       <div className="max-w-md w-full text-center space-y-6 bg-white p-8 sm:p-12 rounded-3xl shadow-xl border border-slate-100">
         <div className="inline-flex p-4 bg-amber-500/10 text-amber-600 rounded-3xl">
           <BedDouble size={48} />

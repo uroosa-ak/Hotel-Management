@@ -1,10 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const maintenanceController = require("../Controller/MaintenanceRequestController");
+const authMiddleware = require("../Middleware/authMiddleware");
+const { authorizeRoles } = require("../Middleware/roleMiddleware");
 
-router.post("/", maintenanceController.createRequest);
-router.get("/", maintenanceController.getAllRequests);
-router.put("/:id", maintenanceController.updateRequest);
-router.delete("/:id", maintenanceController.deleteRequest);
+// Guests and staff can both report issues; only staff manage/resolve them.
+router.post("/", authMiddleware, maintenanceController.createRequest);
+router.get("/", authMiddleware, authorizeRoles("admin", "manager", "housekeeping"), maintenanceController.getAllRequests);
+router.put("/:id", authMiddleware, authorizeRoles("admin", "manager", "housekeeping"), maintenanceController.updateRequest);
+router.delete("/:id", authMiddleware, authorizeRoles("admin", "manager"), maintenanceController.deleteRequest);
 
 module.exports = router;

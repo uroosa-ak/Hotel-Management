@@ -1,252 +1,182 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import {
-  Users,
-  Maximize,
-  BedDouble,
-  Eye,
-  Check,
-  ArrowLeft,
-  Star,
-  Shield,
-  Clock,
-  Sparkles,
-} from '../../components/common/icons';
-import { useAuth } from '../../context/AuthContext';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import PageHero from '../../components/template/PageHero';
+import LegacyPageView from '../../components/template/LegacyPageView';
 import roomService from '../../services/roomService';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import StatusBadge from '../../components/common/StatusBadge';
+import { useAuth } from '../../context/AuthContext';
 
 const RoomDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+
+  const isMongoId = /^[0-9a-fA-F]{24}$/.test(id || '');
+
   const [room, setRoom] = useState(null);
-  const [activeImage, setActiveImage] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState(null);
+  const [loading, setLoading] = useState(isMongoId);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchRoom = async () => {
-      try {
-        const data = await roomService.getById(id);
-        if (isMounted && data) {
-          setRoom(data);
-          setActiveImage(data.images?.[0] || '');
-        }
-      } catch (err) {
-        console.error('Error fetching room details', err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    fetchRoom();
+    if (!isMongoId) return;
+
+    let active = true;
+    setLoading(true);
+    setError('');
+
+    roomService
+      .getById(id)
+      .then((data) => {
+        if (!active) return;
+        setRoom(data);
+        setActiveImage(data?.images?.[0] || null);
+      })
+      .catch((err) => {
+        if (active) setError(err?.message || 'This accommodation could not be found.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
     return () => {
-      isMounted = false;
+      active = false;
     };
-  }, [id]);
+  }, [id, isMongoId]);
 
-  if (loading) return <LoadingSpinner fullScreen text="Loading room details..." />;
+  // If it's a theme slug like /rooms/single-room, render Motela's rich room-detail page
+  if (!isMongoId) {
+    return <LegacyPageView name="room-detail" />;
+  }
 
-  if (!room) {
+  if (loading) {
     return (
-      <div className="page-container text-center py-20">
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Room Not Found</h2>
-        <p className="text-slate-500 mb-6">The accommodation you requested does not exist or has been removed.</p>
-        <Link to="/rooms" className="btn-primary text-sm">
-          Browse All Rooms
-        </Link>
-      </div>
+      <section className="motela-section">
+        <div className="motela-empty">Loading accommodation…</div>
+      </section>
     );
   }
 
-  const defaultImages = [
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=1200&auto=format&fit=crop',
-  ];
-  const gallery = room.images && room.images.length > 0 ? room.images : defaultImages;
-  const currentImage = activeImage || gallery[0];
+  if (error || !room) {
+    return (
+      <section className="motela-section">
+        <div className="motela-empty">
+          <h2 className="motela-title">Accommodation not found</h2>
+          <p className="motela-text" style={{ marginBottom: 22 }}>{error || 'This room is no longer listed.'}</p>
+          <Link to="/rooms" className="motela-btn">Browse all rooms</Link>
+        </div>
+      </section>
+    );
+  }
+
+  const price = room.price || room.pricePerNight || 0;
+  const images = room.images?.length ? room.images : ['/images/rooms/room-01.jpg'];
+  const currentImage = activeImage || images[0];
 
   return (
-    <div className="bg-slate-50 min-h-screen py-8">
-      <div className="page-container">
-        {/* Back Link */}
-        <Link
-          to="/rooms"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-950 mb-6 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          <span>Back to All Accommodations</span>
-        </Link>
+    <>
+      <PageHero
+        title={room.name}
+        subtitle={`${room.type ? room.type.toUpperCase() : 'SUITE'} • ${room.capacity || 2} GUESTS`}
+        image={images[0]}
+      />
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Left Column: Images, Description & Amenities */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Hero Main Image */}
-            <div className="rounded-2xl overflow-hidden h-80 sm:h-96 lg:h-[450px] shadow-lg relative bg-slate-900">
-              <img
-                src={currentImage}
-                alt={room.name}
-                className="w-full h-full object-cover transition-all duration-500"
-              />
-              <div className="absolute top-4 right-4">
-                <StatusBadge status={room.isAvailable ? 'available' : 'unavailable'} />
-              </div>
-            </div>
-
-            {/* Thumbnail Gallery */}
-            {gallery.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
-                {gallery.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(img)}
-                    className={`rounded-xl overflow-hidden h-20 sm:h-24 transition-all cursor-pointer border-2 ${
-                      currentImage === img
-                        ? 'border-amber-500 scale-95 shadow-md'
-                        : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Overview Card */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-amber-600 uppercase tracking-widest">
-                      {room.type} Suite
-                    </span>
-                    <span className="text-slate-300">&bull;</span>
-                    <span className="text-xs text-slate-500">Suite #{room.roomNumber}</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-serif">
-                    {room.name}
-                  </h1>
-                </div>
-
-                {room.rating && (
-                  <div className="flex items-center gap-2 bg-amber-50 px-3.5 py-2 rounded-xl border border-amber-100 shrink-0">
-                    <Star size={18} className="text-amber-500 fill-amber-500" />
-                    <div>
-                      <span className="font-bold text-slate-900 text-sm">
-                        {room.rating.toFixed(1)}
-                      </span>
-                      <span className="text-xs text-slate-500 block">Exceptional</span>
-                    </div>
-                  </div>
-                )}
+      <section className="motela-section">
+        <div className="motela-container">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 50, alignItems: 'start' }}>
+            <div>
+              <div style={{ marginBottom: 20 }}>
+                <img
+                  src={currentImage}
+                  alt={room.name}
+                  style={{ width: '100%', height: 440, objectFit: 'cover', display: 'block' }}
+                />
               </div>
 
-              {/* Description */}
-              <div className="py-6 border-b border-slate-100">
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
-                  About This Suite
-                </h3>
-                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                  {room.description}
-                </p>
-              </div>
-
-              {/* Amenities */}
-              <div className="pt-6">
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">
-                  Suite Amenities & Features
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {room.amenities?.map((amenity, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs sm:text-sm text-slate-700 font-medium"
+              {images.length > 1 && (
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  {images.map((src, i) => (
+                    <button
+                      key={src + i}
+                      type="button"
+                      onClick={() => setActiveImage(src)}
+                      style={{
+                        padding: 0,
+                        border: currentImage === src ? '2px solid #c19c77' : '2px solid transparent',
+                        cursor: 'pointer',
+                        background: 'none',
+                      }}
                     >
-                      <div className="p-1 bg-amber-500/10 text-amber-600 rounded-md">
-                        <Check size={14} />
-                      </div>
-                      <span>{amenity}</span>
-                    </div>
+                      <img src={src} alt="" style={{ width: 90, height: 60, objectFit: 'cover', display: 'block' }} />
+                    </button>
                   ))}
                 </div>
+              )}
+
+              <div style={{ marginTop: 36 }}>
+                <h3 className="motela-title" style={{ fontSize: 24, marginBottom: 14 }}>The accommodation</h3>
+                <p className="motela-text">{room.description || 'Thoughtfully styled with natural textures, ambient lighting, and bespoke furnishings.'}</p>
               </div>
+
+              {room.amenities?.length > 0 && (
+                <div style={{ marginTop: 36 }}>
+                  <h3 className="motela-title" style={{ fontSize: 24, marginBottom: 14 }}>Room features</h3>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                    {room.amenities.map((item) => (
+                      <li key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, color: '#555' }}>
+                        <span style={{ color: '#c19c77', fontSize: 18 }}>•</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* Right Column: Pricing & Booking Card */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-slate-200/80 sticky top-28">
-              <div className="flex items-baseline justify-between pb-5 border-b border-slate-100">
-                <div>
-                  <span className="text-3xl sm:text-4xl font-bold text-amber-600 font-serif">
-                    ${room.pricePerNight}
-                  </span>
-                  <span className="text-xs text-slate-500 ml-1">/ night</span>
-                </div>
-                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-                  Best Rate Direct
-                </span>
+            <aside className="motela-panel" style={{ position: 'sticky', top: 30 }}>
+              <p className="motela-eyebrow">Nightly rate</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 20 }}>
+                <span className="motela-title" style={{ fontSize: 38 }}>${price}</span>
+                <span className="motela-text" style={{ fontSize: 14 }}>/ night</span>
               </div>
 
-              {/* Specs */}
-              <div className="py-6 space-y-4 border-b border-slate-100 text-xs sm:text-sm">
-                <div className="flex items-center justify-between text-slate-600">
-                  <span className="flex items-center gap-2">
-                    <Users size={16} className="text-slate-400" /> Max Capacity
-                  </span>
-                  <span className="font-semibold text-slate-900">{room.capacity} Guests</span>
+              <div style={{ borderTop: '1px solid #eee', borderBottom: '1px solid #eee', padding: '16px 0', margin: '20px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
+                  <span className="motela-text">Occupancy</span>
+                  <span style={{ fontWeight: 600 }}>Up to {room.capacity || 2} guests</span>
                 </div>
-
-                <div className="flex items-center justify-between text-slate-600">
-                  <span className="flex items-center gap-2">
-                    <Maximize size={16} className="text-slate-400" /> Suite Dimension
-                  </span>
-                  <span className="font-semibold text-slate-900">{room.size || 40} m²</span>
-                </div>
-
-                <div className="flex items-center justify-between text-slate-600">
-                  <span className="flex items-center gap-2">
-                    <BedDouble size={16} className="text-slate-400" /> Bed Setup
-                  </span>
-                  <span className="font-semibold text-slate-900">{room.bedType || 'King Bed'}</span>
-                </div>
-
-                <div className="flex items-center justify-between text-slate-600">
-                  <span className="flex items-center gap-2">
-                    <Eye size={16} className="text-slate-400" /> Suite Scenery
-                  </span>
-                  <span className="font-semibold text-slate-900">{room.view || 'Ocean View'}</span>
-                </div>
-              </div>
-
-              {/* Booking Action */}
-              <div className="pt-6 space-y-3">
-                {room.isAvailable ? (
-                  <button
-                    onClick={() => navigate(`/booking/${room._id}`)}
-                    className="btn-accent w-full py-3.5 text-sm font-bold shadow-lg shadow-amber-600/30 cursor-pointer"
-                  >
-                    Proceed to Reservation
-                  </button>
-                ) : (
-                  <div className="text-center py-3 bg-slate-100 rounded-xl text-slate-500 font-semibold text-sm">
-                    Currently Unavailable
+                {room.bedType && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
+                    <span className="motela-text">Bedding</span>
+                    <span style={{ fontWeight: 600 }}>{room.bedType}</span>
                   </div>
                 )}
-
-                <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-2">
-                  <Shield size={13} className="text-amber-500" />
-                  <span>Free cancellation up to 48 hours before check-in</span>
-                </div>
+                {room.size && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+                    <span className="motela-text">Room size</span>
+                    <span style={{ fontWeight: 600 }}>{room.size} m²</span>
+                  </div>
+                )}
               </div>
-            </div>
+
+              <button
+                type="button"
+                className="motela-btn"
+                style={{ width: '100%', textAlign: 'center' }}
+                onClick={() => {
+                  if (isAuthenticated) {
+                    navigate(`/booking?roomId=${room._id}`);
+                  } else {
+                    navigate('/login', { state: { from: { pathname: `/booking?roomId=${room._id}` } } });
+                  }
+                }}
+              >
+                Reserve this room
+              </button>
+            </aside>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 };
 

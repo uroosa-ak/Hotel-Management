@@ -1,0 +1,122 @@
+[
+  {
+    "local": "/wp-mirror/wp-content/plugins/contact-form-7/includes/css/styles.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/motopress-hotel-booking-lite/vendors/kbwood/datepick/jquery.datepick.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/motopress-hotel-booking-lite/assets/css/datepick-themes/mphb-datepicker-minimal.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/motopress-hotel-booking-lite/assets/css/mphb.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/nd-elements/css/style.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/nd-shortcodes/css/style.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/woocommerce/assets/css/woocommerce-layout.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/woocommerce/assets/css/woocommerce-smallscreen.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/woocommerce/assets/css/woocommerce.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/woocommerce/assets/css/brands.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/themes/motela/style.css"
+  },
+  {
+    "external": "https://fonts.googleapis.com/css?family=Playfair+Display%3A300%2C400%2C500%2C600%2C700&ver=1.0.0"
+  },
+  {
+    "external": "https://fonts.googleapis.com/css?family=Jost%3A300%2C400%2C500%2C600%2C700&ver=1.0.0"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/css/frontend.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/css/widget-heading.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/lib/animations/styles/e-animation-hang.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/css/widget-image.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/lib/animations/styles/e-animation-shrink.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/lib/animations/styles/fadeIn.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor-pro/assets/css/conditionals/popup.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/css/widget-icon-list.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/css/widget-image-gallery.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/css/widget-social-icons.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/css/conditionals/apple-webkit.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/lib/animations/styles/fadeInRight.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor-pro/assets/css/widget-nav-menu.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/uploads/sites/2/elementor/css/post-3108.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/lib/animations/styles/fadeInUp.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor-pro/assets/css/modules/motion-fx.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor-pro/assets/css/modules/sticky.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/elementor/assets/css/widget-counter.min.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/uploads/sites/2/elementor/css/post-1970.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/uploads/sites/2/elementor/css/post-2280.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/uploads/sites/2/elementor/css/post-1332.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/uploads/sites/2/elementor/css/post-273.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/uploads/sites/2/elementor/css/post-22.css"
+  },
+  {
+    "local": "/wp-mirror/wp-content/uploads/sites/2/elementor/css/post-125.css"
+  },
+  {
+    "external": "https://fonts.googleapis.com/css?family=Playfair+Display:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+  },
+  {
+    "external": "https://fonts.googleapis.com/css?family=Jost:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+  },
+  {
+    "local": "/wp-mirror/wp-content/plugins/woocommerce/assets/client/blocks/wc-blocks.css"
+  }
+]

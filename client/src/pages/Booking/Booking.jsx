@@ -97,27 +97,14 @@ const Booking = () => {
 
     setSubmitting(true);
     try {
+      // Guest identity, pricing and status are all decided server-side from the
+      // signed-in account - only the stay details are sent.
       const payload = {
-        room: {
-          _id: room._id,
-          name: room.name,
-          roomNumber: room.roomNumber,
-          type: room.type,
-          images: room.images,
-        },
-        user: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-        },
+        room: room._id,
         checkIn: formData.checkIn,
         checkOut: formData.checkOut,
         guests: parseInt(formData.guests, 10),
-        totalAmount: pricing.total,
         specialRequests: formData.specialRequests,
-        status: 'confirmed',
-        paymentStatus: 'paid',
       };
 
       const result = await bookingService.create(payload);
@@ -133,7 +120,7 @@ const Booking = () => {
 
   if (bookingSuccess) {
     return (
-      <div className="bg-slate-50 min-h-screen py-16">
+      <div className="app-shell bg-background min-h-screen py-16">
         <div className="page-container max-w-2xl text-center">
           <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-slate-100 space-y-6">
             <div className="inline-flex p-4 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">
@@ -145,10 +132,9 @@ const Booking = () => {
             </h1>
 
             <p className="text-slate-600 text-sm leading-relaxed max-w-md mx-auto">
-              Thank you for choosing Grand Hotel. Your reservation for{' '}
-              <strong className="text-slate-900">{room?.name}</strong> has been successfully booked.
-              A confirmation email has been sent to{' '}
-              <strong className="text-amber-600">{formData.email}</strong>.
+              Thank you for choosing LuxuryStay. Your reservation for{' '}
+              <strong className="text-slate-900">{room?.name}</strong> has been received and is
+              awaiting confirmation from our front desk.
             </p>
 
             <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-left text-xs space-y-2.5 max-w-md mx-auto">
@@ -163,8 +149,12 @@ const Booking = () => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Total Amount Paid:</span>
-                <span className="font-bold text-amber-600">${pricing.total}</span>
+                <span className="text-slate-500">Total (room charge):</span>
+                <span className="font-bold text-accent">${bookingSuccess.totalAmount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Status:</span>
+                <span className="font-semibold text-slate-900 capitalize">{bookingSuccess.status}</span>
               </div>
             </div>
 
@@ -183,7 +173,7 @@ const Booking = () => {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen py-10">
+    <div className="app-shell bg-background min-h-screen py-10">
       <div className="page-container">
         <Link
           to={room ? `/rooms/${room._id}` : '/rooms'}

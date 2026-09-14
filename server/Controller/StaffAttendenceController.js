@@ -1,4 +1,4 @@
-const StaffAttendance = require("../models/StaffAttendance");
+const StaffAttendance = require("../models/StaffAttandence");
 
 // Add attendance
 exports.addAttendance = async (req, res) => {

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment variables (never commit real secrets)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Build output
+dist/
+dist-ssr/
+build/
+
+# Test artefacts
+client/tests/screenshots/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor/OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.local

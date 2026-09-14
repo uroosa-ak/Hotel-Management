@@ -53,8 +53,8 @@ const userController = {
 
       const token = jwt.sign(
         { id: newUser._id, role: newUser.role },
-        process.env.JWT_SECRET || "hotel-secret",
-        { expiresIn: "7d" }
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
       );
 
       const userResponse = newUser.toObject();
@@ -95,8 +95,8 @@ const userController = {
 
       const token = jwt.sign(
         { id: user._id, role: user.role },
-        process.env.JWT_SECRET || "hotel-secret",
-        { expiresIn: "7d" }
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
       );
 
       res.cookie("token", token, {
@@ -201,6 +201,38 @@ const userController = {
       });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  },
+
+  // Change own password
+  changePassword: async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current and new password are required." });
+      }
+      if (!validatePassword(newPassword)) {
+        return res.status(400).json({
+          message: "New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+        });
+      }
+
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: "Current password is incorrect." });
+      }
+
+      user.password = await bcrypt.hash(newPassword, 10);
+      await user.save();
+
+      res.json({ message: "Password changed successfully." });
+    } catch (error) {
+      res.status(500).json({ message: error.message || "Failed to change password." });
     }
   },
 

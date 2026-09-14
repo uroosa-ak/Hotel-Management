@@ -141,7 +141,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Mail size={18} className="text-amber-400 shrink-0" />
-                <span>reservations@grandhotel.com</span>
+                <span>reservations@luxurystay.com</span>
               </div>
             </div>
           </div>
@@ -149,7 +149,7 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="border-t border-slate-900 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>&copy; {new Date().getFullYear()} Grand Hotel & Resort Management. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} LuxuryStay Grand Hotel & Suites. All rights reserved.</p>
           <div className="flex gap-6">
             <span className="hover:text-slate-400 cursor-pointer">Privacy Policy</span>
             <span className="hover:text-slate-400 cursor-pointer">Terms of Service</span>

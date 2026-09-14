@@ -1,45 +1,304 @@
-@import "tailwindcss";
-
-@theme {
-  --color-primary: #0f172a;
-  --color-primary-light: #1e293b;
-  --color-secondary: #334155;
-  --color-accent: #d97706;
-  --color-accent-hover: #b45309;
-  --color-accent-light: #fef3c7;
-  --color-background: #f8fafc;
-  --color-card: #ffffff;
-  --color-muted: #64748b;
-  --color-danger: #ef4444;
-  --color-success: #10b981;
-}
-
-body {
+html, body, #root {
   margin: 0;
   padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a;
+  min-height: 100%;
+}
+
+/* ==========================================================================
+   Horizontal Booking Search Form (Home & Rooms)
+   ========================================================================== */
+
+/* Outer card container for search form */
+.elementor-element-7ec6077 {
+  width: 100% !important;
+  max-width: 1140px !important;
+  margin: 40px auto 30px auto !important;
+}
+
+.elementor-element-78eabe2 {
+  background-color: #ffffff !important;
+  border: 1px solid #eae5de !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04) !important;
+  padding: 30px 40px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+/* Hide required fields notice */
+.nd_searchform_horizontal .mphb-required-fields-tip {
+  display: none !important;
+}
+
+/* Main form flex container - displays in 1 row */
+.nd_searchform_horizontal form.mphb_sc_search-form {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Clear floats and reset margin on all field wrapper <p> tags */
+.nd_searchform_horizontal form.mphb_sc_search-form > p {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  float: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  box-sizing: border-box !important;
+}
+
+/* Remove stray line breaks inside paragraphs */
+.nd_searchform_horizontal form.mphb_sc_search-form > p br {
+  display: none !important;
+}
+
+/* Labels */
+.nd_searchform_horizontal form.mphb_sc_search-form > p label {
+  font-family: 'Jost', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #2b2b2b !important;
+  margin-bottom: 8px !important;
+  line-height: 1.2 !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+.nd_searchform_horizontal form.mphb_sc_search-form > p label abbr {
+  color: #b99470 !important;
+  text-decoration: none !important;
+  margin-left: 2px !important;
+}
+
+/* Inputs & Select dropdowns */
+.nd_searchform_horizontal form.mphb_sc_search-form input[type="text"],
+.nd_searchform_horizontal form.mphb_sc_search-form select {
+  width: 100% !important;
+  height: 48px !important;
+  line-height: 48px !important;
+  padding: 0 16px !important;
+  border: 1px solid #ded8d0 !important;
+  border-radius: 0px !important;
+  background-color: #fff !important;
+  font-family: 'Jost', sans-serif !important;
+  font-size: 14px !important;
+  color: #555 !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  transition: border-color 0.2s ease !important;
+}
+
+.nd_searchform_horizontal form.mphb_sc_search-form input[type="text"]:focus,
+.nd_searchform_horizontal form.mphb_sc_search-form select:focus {
+  border-color: #b99470 !important;
+}
+
+.nd_searchform_horizontal form.mphb_sc_search-form select {
+  cursor: pointer !important;
+  appearance: auto !important;
+}
+
+/* Submit Button Wrapper & Input */
+.nd_searchform_horizontal form.mphb_sc_search-form > p.mphb_sc_search-submit-button-wrapper {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+.nd_searchform_horizontal form.mphb_sc_search-form > p.mphb_sc_search-submit-button-wrapper input[type="submit"],
+.nd_searchform_horizontal form.mphb_sc_search-form > p.mphb_sc_search-submit-button-wrapper input.button {
+  width: 100% !important;
+  height: 48px !important;
+  line-height: 48px !important;
+  padding: 0 20px !important;
+  background-color: #b99470 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 0px !important;
+  font-family: 'Jost', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  transition: background-color 0.3s ease !important;
+  margin: 0 !important;
+  display: block !important;
+  text-align: center !important;
+}
+
+.nd_searchform_horizontal form.mphb_sc_search-form > p.mphb_sc_search-submit-button-wrapper input[type="submit"]:hover,
+.nd_searchform_horizontal form.mphb_sc_search-form > p.mphb_sc_search-submit-button-wrapper input.button:hover {
+  background-color: #9f7b57 !important;
+}
+
+/* Hide hidden inputs from layout */
+.nd_searchform_horizontal form.mphb_sc_search-form input[type="hidden"] {
+  display: none !important;
+}
+
+/* White version for transparent/dark sections */
+.nd_searchform_white label {
+  color: #fff !important;
+}
+.nd_searchform_white input[type="text"],
+.nd_searchform_white select {
+  background-color: transparent !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #fff !important;
+}
+.nd_searchform_white input[type="text"]::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.nd_searchform_white select option {
+  color: #222 !important;
+  background: #fff !important;
+}
+
+/* Ensure datepicker popup appears above other elements */
+.datepick-popup {
+  z-index: 999999 !important;
+}
+
+/* Responsive: stack vertically on mobile screens */
+@media (max-width: 900px) {
+  .nd_searchform_horizontal form.mphb_sc_search-form {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .nd_searchform_horizontal form.mphb_sc_search-form > p {
+    width: 100% !important;
+    flex: none !important;
+  }
+}
+
+
+
+
+/* Tailwind is loaded WITHOUT preflight: the Motela template's WordPress/Elementor
+   stylesheets own the global element styling for the public site, and Tailwind's
+   global reset would flatten them. Utilities + theme only; the staff/auth screens
+   get their own scoped reset via .app-shell below. */
+/* The utilities are deliberately NOT put in a cascade layer: the template's
+   WordPress stylesheets are unlayered, and unlayered rules beat layered ones
+   whatever their specificity, which would leave every utility class in the
+   staff portal inert. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css";
+
+/* Palette taken from the Motela template's Elementor global kit so the staff
+   portal and the public site share one identity. */
+@theme {
+  --color-primary: #1c1c1c;
+  --color-primary-light: #333333;
+  --color-secondary: #5c5c5c;
+  --color-accent: #c19c77;
+  --color-accent-hover: #a9865f;
+  --color-accent-light: #f4ece4;
+  --color-background: #f3f3f3;
+  --color-card: #ffffff;
+  --color-muted: #5c5c5c;
+  --color-danger: #b4453c;
+  --color-success: #4c7a5a;
+
+  --font-sans: 'Jost', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+/* Scoped reset for the staff portal / auth / guest screens, which are built with
+   Tailwind utilities rather than template markup. */
+.app-shell,
+.app-shell *,
+.app-shell *::before,
+.app-shell *::after {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-primary);
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.app-shell h1,
+.app-shell h2,
+.app-shell h3,
+.app-shell h4,
+.app-shell h5,
+.app-shell h6,
+.app-shell p,
+.app-shell figure,
+.app-shell blockquote {
+  margin: 0;
+}
+
+.app-shell ul,
+.app-shell ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-shell img,
+.app-shell svg,
+.app-shell video {
+  display: block;
+  max-width: 100%;
+}
+
+.app-shell a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell button,
+.app-shell input,
+.app-shell select,
+.app-shell textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+.app-shell button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.app-shell table {
+  border-collapse: collapse;
+  width: 100%;
 }
 
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #0f172a;
+  background-color: #1c1c1c;
   color: #ffffff;
   font-weight: 500;
   padding: 0.625rem 1.25rem;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   transition: all 0.2s ease;
   cursor: pointer;
   border: none;
+  letter-spacing: 0.04em;
 }
 .btn-primary:hover {
-  background-color: #1e293b;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  background-color: #333333;
 }
 .btn-primary:disabled {
   opacity: 0.6;
@@ -50,58 +309,63 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: #f4ece4;
+  color: #1c1c1c;
   font-weight: 500;
   padding: 0.625rem 1.25rem;
-  border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  border: 1px solid #e7dbcd;
   transition: all 0.2s ease;
   cursor: pointer;
 }
 .btn-secondary:hover {
-  background-color: #e2e8f0;
+  background-color: #e7dbcd;
 }
 
 .btn-accent {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #d97706;
+  background-color: #c19c77;
   color: #ffffff;
   font-weight: 500;
   padding: 0.625rem 1.25rem;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   transition: all 0.2s ease;
   cursor: pointer;
   border: none;
+  letter-spacing: 0.04em;
 }
 .btn-accent:hover {
-  background-color: #b45309;
+  background-color: #a9865f;
+}
+.btn-accent:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .input-field {
   width: 100%;
   padding: 0.625rem 0.875rem;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
+  border-radius: 0.25rem;
+  border: 1px solid #dcd3c8;
   background-color: #ffffff;
-  color: #0f172a;
+  color: #1c1c1c;
   font-size: 0.875rem;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
 }
 .input-field:focus {
-  border-color: #0f172a;
-  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.1);
+  border-color: #c19c77;
+  box-shadow: 0 0 0 2px rgba(189, 154, 122, 0.2);
 }
 
 .card {
   background-color: #ffffff;
-  border-radius: 0.75rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  border: 1px solid #efe9e2;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -121,3 +385,395 @@ body {
     padding: 3rem 2rem;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Template-styled application screens (rooms, room detail, booking, auth).
+   These use the Motela palette and typography so the data-driven pages sit
+   naturally next to the template's own pages.
+   ------------------------------------------------------------------------ */
+
+.motela-hero {
+  position: relative;
+  min-height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  background-color: #1c1c1c;
+}
+.motela-hero__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Keeps the white serif title readable over any photograph. */
+.motela-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(14, 14, 14, 0.88), rgba(14, 14, 14, 0.5) 55%, rgba(14, 14, 14, 0.65));
+}
+.motela-hero__inner {
+  position: relative;
+  z-index: 2;
+}
+.motela-hero__inner {
+  position: relative;
+  z-index: 1;
+  padding: 90px 20px;
+  width: 100%;
+}
+/* The theme styles headings globally, so the hero text needs to out-specify it. */
+.motela-hero .motela-hero__title,
+.motela-hero h1.motela-hero__title,
+.motela-hero h2.motela-hero__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(38px, 6vw, 76px);
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.1;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+.motela-hero .motela-hero__subtitle {
+  font-family: 'Jost', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-size: 13px;
+  color: #ffffff;
+  margin-top: 14px;
+  opacity: 0.9;
+}
+
+.motela-searchbar {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 22px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  align-items: end;
+  max-width: 1100px;
+  margin: 34px auto 0;
+  text-align: left;
+}
+.motela-searchbar label {
+  display: block;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #5c5c5c;
+  margin-bottom: 7px;
+}
+.motela-searchbar input,
+.motela-searchbar select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #e2e2e2;
+  background: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  color: #1c1c1c;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+.motela-searchbar input:focus,
+.motela-searchbar select:focus {
+  outline: none;
+  border-color: #c19c77;
+}
+
+a.motela-btn,
+button.motela-btn,
+.motela-btn {
+  display: inline-block;
+  background: #c19c77;
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 13px 30px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  text-align: center;
+  text-decoration: none;
+}
+a.motela-btn:hover,
+button.motela-btn:hover {
+  background: #1c1c1c;
+  color: #fff;
+}
+button.motela-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+a.motela-btn--dark,
+button.motela-btn--dark {
+  background: #1c1c1c;
+}
+a.motela-btn--dark:hover,
+button.motela-btn--dark:hover {
+  background: #c19c77;
+}
+a.motela-btn--ghost,
+button.motela-btn--ghost {
+  background: transparent;
+  color: #1c1c1c;
+  border: 1px solid #1c1c1c;
+}
+a.motela-btn--ghost:hover,
+button.motela-btn--ghost:hover {
+  background: #1c1c1c;
+  color: #fff;
+}
+
+.motela-section {
+  background: #fff;
+  padding: 70px 20px;
+}
+.motela-section--alt {
+  background: #f3f3f3;
+}
+.motela-container {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+.motela-eyebrow {
+  font-family: 'Jost', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 12px;
+  color: #c19c77;
+  margin-bottom: 12px;
+}
+.motela-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(28px, 3.4vw, 46px);
+  font-weight: 400;
+  color: #1c1c1c;
+  margin: 0 0 14px;
+  line-height: 1.2;
+}
+.motela-text {
+  font-family: 'Jost', sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #5c5c5c;
+  margin: 0;
+}
+
+.motela-room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 30px;
+}
+
+.motela-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 26px;
+  margin-bottom: 34px;
+  border-bottom: 1px solid #e6e6e6;
+}
+/* The theme styles bare <button> elements, so these need to out-specify it. */
+button.motela-chip {
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  border: 1px solid #e2e2e2;
+  border-radius: 0;
+  background: #fff;
+  color: #5c5c5c;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+button.motela-chip:hover {
+  border-color: #c19c77;
+  color: #1c1c1c;
+  background: #fff;
+}
+button.motela-chip--active,
+button.motela-chip--active:hover {
+  background: #1c1c1c;
+  border-color: #1c1c1c;
+  color: #fff;
+}
+
+/* Mobile navigation. The template's own dropdown relies on Elementor's JS to
+   position itself, so the app ships its own. */
+.motela-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  padding: 11px;
+  background: #c19c77;
+  border: none;
+  cursor: pointer;
+}
+.motela-menu-toggle svg {
+  width: 100%;
+  height: 100%;
+  fill: #ffffff;
+}
+
+.motela-mobile-nav {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #ececec;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.12);
+  padding: 10px 0 18px;
+  z-index: 999;
+}
+.motela-mobile-nav .elementor-nav-menu {
+  display: block;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.motela-mobile-nav .elementor-nav-menu > li {
+  display: block;
+  border-bottom: 1px solid #f2f2f2;
+}
+.motela-mobile-nav .elementor-nav-menu a,
+.motela-mobile-nav .elementor-nav-menu button {
+  display: block;
+  padding: 14px 24px;
+  font-family: 'Jost', sans-serif;
+  font-size: 15px;
+  color: #1c1c1c;
+  text-decoration: none;
+}
+.motela-mobile-nav .sub-menu {
+  display: block;
+  margin: 0;
+  padding: 0 0 8px 16px;
+  list-style: none;
+  background: #faf9f7;
+}
+.motela-mobile-nav .sub-menu a {
+  padding: 10px 24px;
+  font-size: 14px;
+  color: #5c5c5c;
+}
+
+@media (max-width: 1024px) {
+  .motela-menu-toggle {
+    display: inline-flex;
+  }
+  .elementor-22 .elementor-nav-menu--main {
+    display: none;
+  }
+  .elementor-22 .elementor-element-c54a532 {
+    position: relative;
+  }
+}
+
+/* Text logo replacing the template's own brand mark. */
+.motela-logo {
+  display: inline-block;
+  line-height: 1;
+  text-decoration: none;
+}
+.motela-logo__name {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 30px;
+  letter-spacing: 3px;
+  color: #1c1c1c;
+  text-transform: uppercase;
+}
+.motela-logo__tagline {
+  display: block;
+  font-family: 'Jost', sans-serif;
+  font-size: 10px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: #c19c77;
+  margin-top: 5px;
+}
+
+.motela-empty {
+  text-align: center;
+  padding: 70px 20px;
+  font-family: 'Jost', sans-serif;
+  color: #5c5c5c;
+}
+
+.motela-panel {
+  background: #fff;
+  border: 1px solid #ececec;
+  padding: 30px;
+}
+.motela-label {
+  display: block;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #5c5c5c;
+  margin-bottom: 7px;
+}
+.motela-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e2e2e2;
+  background: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  color: #1c1c1c;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+.motela-input:focus {
+  outline: none;
+  border-color: #c19c77;
+}
+.motela-alert {
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border-left: 3px solid #c19c77;
+  background: #f7f2ec;
+  color: #1c1c1c;
+}
+.motela-alert--error {
+  border-left-color: #b4453c;
+  background: #fbeeed;
+  color: #8d332c;
+}
+.motela-alert--success {
+  border-left-color: #4c7a5a;
+  background: #eef5f0;
+  color: #2f5740;
+}
+
+/* The template's logout entry sits inside a nav list, so it has to look like
+   the links around it rather than a button. */
+.motela-logout {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+

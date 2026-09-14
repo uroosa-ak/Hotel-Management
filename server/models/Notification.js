@@ -1,7 +1,7 @@
 const { Schema, default: mongoose } = require("mongoose");
 
 const notificationSchema = new Schema({
-    user: { type: Schema.Types.ObjectId, ref: "user" },
+    user: { type: Schema.Types.ObjectId, ref: "User" },
     message: { type: String, required: true },
     type: { type: String, enum: ["info", "alert", "reminder"], default: "info" },
     read: { type: Boolean, default: false },

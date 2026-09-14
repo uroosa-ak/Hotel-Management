@@ -19,8 +19,6 @@ function mapRoomToClient(room) {
     view: r.view || (r.roomType === 'suite' ? 'Skyline & Ocean' : r.roomType === 'deluxe' ? 'Ocean' : 'City'),
     status: r.status || 'available',
     isAvailable: r.status === 'available' && (r.availability !== undefined ? r.availability : true),
-    rating: r.rating || 4.8,
-    reviewsCount: r.reviewsCount || 24,
     description: r.description || 'Luxurious accommodations with premium amenities.',
     amenities: r.amenities || ['High-speed Wi-Fi', 'Air Conditioning', 'Flat-screen TV', 'Mini Bar'],
     images: (r.images && r.images.length > 0) ? r.images : (r.image ? [r.image] : ['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop'])
@@ -30,7 +28,7 @@ function mapRoomToClient(room) {
 // Create room
 exports.createRoom = async (req, res) => {
   try {
-    const { roomNumber, roomType, type, price, pricePerNight, floor, capacity, description, amenities, status, images } = req.body;
+    const { roomNumber, name, roomType, type, price, pricePerNight, floor, capacity, size, bedType, view, description, amenities, status, images } = req.body;
 
     const finalRoomNumber = roomNumber ? String(roomNumber).trim() : null;
     if (!validateRoomNumber(finalRoomNumber)) {
@@ -51,17 +49,24 @@ exports.createRoom = async (req, res) => {
     const validTypes = ['single', 'double', 'deluxe', 'suite'];
     const finalType = validTypes.includes(rawType) ? rawType : 'deluxe';
 
+    const imageList = Array.isArray(images) ? images : (images ? [images] : []);
+
     const newRoom = await Room.create({
       roomNumber: finalRoomNumber,
+      name: (name && name.trim()) || `${finalType.charAt(0).toUpperCase() + finalType.slice(1)} Room ${finalRoomNumber}`,
       roomType: finalType,
       floor: floor || 1,
       capacity: capacity || 2,
+      size: size || 30,
+      bedType: bedType || 'Queen',
+      view: view || 'City',
       price: Number(finalPrice),
       status: status || 'available',
       availability: status ? status === 'available' : true,
       description: description || 'Luxurious accommodations with premium amenities.',
       amenities: Array.isArray(amenities) ? amenities : ['High-speed Wi-Fi', 'Air Conditioning'],
-      image: (Array.isArray(images) && images.length > 0) ? images[0] : 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop'
+      images: imageList,
+      image: imageList[0] || '/images/rooms/room-01.jpg'
     });
 
     res.status(201).json(mapRoomToClient(newRoom));
@@ -109,7 +114,7 @@ exports.getRoomById = async (req, res) => {
 // Update room
 exports.updateRoom = async (req, res) => {
   try {
-    const { roomNumber, roomType, type, price, pricePerNight, floor, capacity, description, amenities, status } = req.body;
+    const { roomNumber, name, roomType, type, price, pricePerNight, floor, capacity, size, bedType, view, description, amenities, status, images } = req.body;
     const update = {};
 
     if (roomNumber !== undefined) {
@@ -132,10 +137,19 @@ exports.updateRoom = async (req, res) => {
       update.roomType = ['single', 'double', 'deluxe', 'suite'].includes(rawType) ? rawType : 'deluxe';
     }
 
+    if (name !== undefined) update.name = name;
     if (floor !== undefined) update.floor = floor;
     if (capacity !== undefined) update.capacity = capacity;
+    if (size !== undefined) update.size = size;
+    if (bedType !== undefined) update.bedType = bedType;
+    if (view !== undefined) update.view = view;
     if (description !== undefined) update.description = description;
     if (amenities !== undefined) update.amenities = amenities;
+    if (images !== undefined) {
+      const imageList = Array.isArray(images) ? images : (images ? [images] : []);
+      update.images = imageList;
+      if (imageList[0]) update.image = imageList[0];
+    }
 
     if (status !== undefined) {
       update.status = status;

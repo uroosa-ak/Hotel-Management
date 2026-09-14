@@ -50,46 +50,73 @@ function mapBookingToClient(booking) {
     };
 }
 
-// Create new booking
+// Create new booking. Guest identity always comes from the authenticated
+// user (never trusted from the request body) so one account can't book
+// under another guest's name.
 exports.createBooking = async (req, res) => {
     try {
-        const { room, user, checkIn, checkOut, guests, totalAmount, specialRequests, status, paymentStatus } = req.body;
+        const { room, checkIn, checkOut, guests, specialRequests } = req.body;
 
-        if (!room || !user || !checkIn || !checkOut) {
-            return res.status(400).json({ message: "Required booking fields are missing" });
+        if (!room || !checkIn || !checkOut) {
+            return res.status(400).json({ message: "Room, check-in and check-out dates are required" });
         }
 
-        // Find or create Guest profile by email
-        let guestDoc = await Guest.findOne({ email: user.email });
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        if (isNaN(checkInDate) || isNaN(checkOutDate) || checkOutDate <= checkInDate) {
+            return res.status(400).json({ message: "Check-out date must be after check-in date" });
+        }
+
+        const roomId = room._id || room;
+        const roomDoc = await Room.findById(roomId);
+        if (!roomDoc) {
+            return res.status(404).json({ message: "Room not found" });
+        }
+
+        // Reject overlapping bookings for the same room (any status except cancelled blocks it).
+        const overlap = await Booking.findOne({
+            room: roomId,
+            bookingStatus: { $ne: 'cancelled' },
+            checkInDate: { $lt: checkOutDate },
+            checkOutDate: { $gt: checkInDate }
+        });
+        if (overlap) {
+            return res.status(409).json({ message: "Room is not available for the selected dates" });
+        }
+
+        // Find or create the Guest CRM record tied to the logged-in user's email.
+        let guestDoc = await Guest.findOne({ email: req.user.email });
         if (!guestDoc) {
             guestDoc = await Guest.create({
-                firstName: user.firstName || 'Guest',
-                lastName: user.lastName || 'User',
-                email: user.email,
-                contact: user.phone || 'no contact'
+                firstName: req.user.firstName || req.user.username || 'Guest',
+                lastName: req.user.lastName || 'User',
+                email: req.user.email,
+                contact: req.user.phone || req.user.contact || 'no contact'
             });
         } else {
-            // Update total visits or details if needed
             guestDoc.totalVisits = (guestDoc.totalVisits || 0) + 1;
             await guestDoc.save();
         }
 
-        const roomId = room._id || room;
+        const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
+        const totalAmount = roomDoc.price * nights;
 
         const booking = await Booking.create({
             guest: guestDoc._id,
             room: roomId,
-            checkInDate: new Date(checkIn),
-            checkOutDate: new Date(checkOut),
+            checkInDate,
+            checkOutDate,
             numberOfGuests: guests || 1,
-            totalAmount: totalAmount || 0,
-            bookingStatus: status || 'pending',
-            paymentStatus: paymentStatus || 'pending',
+            totalAmount,
+            bookingStatus: 'pending',
+            paymentStatus: 'pending',
             specialRequest: specialRequests || ''
         });
 
-        // Update room status
-        await Room.findByIdAndUpdate(roomId, { status: 'reserved' });
+        // The room's status tracks its physical state (occupied/cleaning), which
+        // changes at check-in and check-out. A future reservation must not make
+        // the room unbookable for other dates - overlapping stays are rejected
+        // by the conflict check above.
 
         const populated = await Booking.findById(booking._id).populate('guest room');
         res.status(201).json(mapBookingToClient(populated));
@@ -108,12 +135,17 @@ exports.getAllBookings = async (req, res) => {
     }
 };
 
-// Get booking by ID
+const isStaffRole = (role) => ["admin", "manager", "receptionist"].includes(role);
+
+// Get booking by ID - staff can view any booking, guests only their own
 exports.getBookingById = async (req, res) => {
     try {
         const booking = await Booking.findById(req.params.id).populate('guest room');
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
+        }
+        if (!isStaffRole(req.user.role) && booking.guest?.email !== req.user.email) {
+            return res.status(403).json({ message: "Access denied" });
         }
         res.json(mapBookingToClient(booking));
     } catch (error) {
@@ -184,12 +216,15 @@ exports.updateBookingStatus = async (req, res) => {
     }
 };
 
-// Cancel booking
+// Cancel booking - staff can cancel any booking, guests only their own
 exports.cancelBooking = async (req, res) => {
     try {
-        const booking = await Booking.findById(req.params.id);
+        const booking = await Booking.findById(req.params.id).populate('guest');
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
+        }
+        if (!isStaffRole(req.user.role) && booking.guest?.email !== req.user.email) {
+            return res.status(403).json({ message: "Access denied" });
         }
 
         booking.bookingStatus = 'cancelled';

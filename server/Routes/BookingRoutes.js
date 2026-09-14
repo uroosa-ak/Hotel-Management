@@ -4,8 +4,8 @@ const bookingController = require("../Controller/BookingController");
 const authMiddleware = require("../Middleware/authMiddleware");
 const { authorizeRoles } = require("../Middleware/roleMiddleware");
 
-// Create new booking (guests or staff)
-routes.post("/", bookingController.createBooking);
+// Create new booking (must be logged in - identity is derived from the token, never the body)
+routes.post("/", authMiddleware, bookingController.createBooking);
 
 // Get current logged-in user's bookings
 routes.get("/my/bookings", authMiddleware, bookingController.getMyBookings);

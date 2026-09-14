@@ -2,8 +2,8 @@ const { Schema, default: mongoose } = require("mongoose");
 
 const eventSchema = new Schema({
     eventName: { type: String, required: true },
-    guest: { type: Schema.Types.ObjectId, ref: "guest" },
-    room: { type: Schema.Types.ObjectId, ref: "room" }, // e.g., conference room
+    guest: { type: Schema.Types.ObjectId, ref: "Guest" },
+    room: { type: Schema.Types.ObjectId, ref: "Room" }, // e.g., conference room
     date: { type: Date, required: true },
     startTime: { type: String },
     endTime: { type: String },

@@ -4,13 +4,12 @@ const userController = require("../Controller/userController");
 const authMiddleware = require("../Middleware/authMiddleware");
 const { authorizeRoles } = require("../Middleware/roleMiddleware");
 
-// Public Auth Endpoints
-router.post("/register", userController.register);
-router.post("/login", userController.login);
+// Auth endpoints (register/login/me) live at /api/auth - see AuthRoutes.js.
 
 // Authenticated User Endpoints
 router.get("/profile", authMiddleware, userController.getProfile);
 router.put("/profile", authMiddleware, userController.updateUser);
+router.put("/change-password", authMiddleware, userController.changePassword);
 
 // Staff & User Management (Admin & Manager only)
 router.get("/all", authMiddleware, authorizeRoles("admin", "manager"), userController.getUsers);

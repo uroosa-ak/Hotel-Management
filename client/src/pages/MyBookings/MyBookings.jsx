@@ -61,7 +61,7 @@ const MyBookings = () => {
   });
 
   return (
-    <div className="bg-slate-50 min-h-screen py-10">
+    <div className="app-shell bg-background min-h-screen py-10">
       <div className="page-container">
         <PageHeader
           title="My Reservations"

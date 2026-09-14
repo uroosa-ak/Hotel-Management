@@ -7,6 +7,12 @@ const roomSchema = new Schema(
         unique: true
     },
 
+    name: {
+        type: String,
+        trim: true,
+        default: ""
+    },
+
     roomType: {
         type: String,
         enum: [
@@ -65,6 +71,27 @@ const roomSchema = new Schema(
     image: {
         type: String,
         default: ""
+    },
+
+    images: [
+        {
+            type: String
+        }
+    ],
+
+    size: {
+        type: Number,
+        default: 30
+    },
+
+    bedType: {
+        type: String,
+        default: "Queen"
+    },
+
+    view: {
+        type: String,
+        default: "City"
     },
 
     createdAt: {

@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, Mail, Lock, Hotel, Shield } from '../../components/common/icons';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-
 import { validateEmail } from '../../utils/validators';
+
+const DEMO_ACCOUNTS = [
+  { label: 'Guest', email: 'guest@luxurystay.com', password: 'GuestPassword123!' },
+  { label: 'Housekeeping', email: 'housekeeping@luxurystay.com', password: 'HousekeepingPass123!' },
+  { label: 'Receptionist', email: 'reception@luxurystay.com', password: 'StaffPassword123!' },
+  { label: 'Manager', email: 'manager@luxurystay.com', password: 'ManagerPassword123!' },
+  { label: 'Admin', email: 'admin@luxurystay.com', password: 'AdminPassword123!' },
+];
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -29,7 +34,6 @@ const Login = () => {
     }
 
     setLoading(true);
-
     try {
       const res = await login(formData);
       const userRole = res?.user?.role || res?.role;
@@ -39,135 +43,110 @@ const Login = () => {
         navigate(from, { replace: true });
       }
     } catch (err) {
-      setError(err?.message || 'Invalid email or password credentials');
+      setError(err?.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleQuickDemo = (role) => {
-    if (role === 'admin') {
-      setFormData({ email: 'admin@luxurystay.com', password: 'AdminPassword123!' });
-    } else if (role === 'receptionist') {
-      setFormData({ email: 'reception@luxurystay.com', password: 'StaffPassword123!' });
-    } else {
-      setFormData({ email: 'guest@luxurystay.com', password: 'GuestPassword123!' });
-    }
-  };
-
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 bg-slate-50">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <div className="inline-flex p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl mb-4 text-amber-500">
-            <Hotel size={32} />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-serif">
-            Welcome Back
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
-            Sign in to access your hotel reservations and member rewards
+    <section className="motela-section motela-section--alt" style={{ minHeight: '70vh' }}>
+      <div style={{ maxWidth: 460, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 34 }}>
+          <p className="motela-eyebrow">LuxuryStay Hospitality</p>
+          <h1 className="motela-title" style={{ marginBottom: 8 }}>Sign in</h1>
+          <p className="motela-text" style={{ fontSize: 14 }}>
+            Access your reservations, or open the staff portal.
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 space-y-6">
-          {error && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs leading-relaxed">
-              {error}
-            </div>
-          )}
+        <div className="motela-panel">
+          {error && <div className="motela-alert motela-alert--error">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="email"
-                  required
-                  className="input-field pl-10"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
+          <form onSubmit={handleSubmit} noValidate>
+            <div style={{ marginBottom: 20 }}>
+              <label className="motela-label" htmlFor="login-email">Email address</label>
+              <input
+                id="login-email"
+                type="email"
+                className="motela-input"
+                placeholder="you@example.com"
+                autoComplete="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-700">Password</label>
-                <span className="text-[11px] text-amber-600 hover:underline cursor-pointer">
-                  Forgot password?
-                </span>
-              </div>
-              <div className="relative">
-                <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div style={{ marginBottom: 26 }}>
+              <label className="motela-label" htmlFor="login-password">Password</label>
+              <div style={{ position: 'relative' }}>
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
-                  required
-                  className="input-field pl-10 pr-10"
+                  className="motela-input"
                   placeholder="Enter your password"
+                  autoComplete="current-password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                  style={{ paddingRight: 74 }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  style={{
+                    position: 'absolute',
+                    right: 10,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: "'Jost', sans-serif",
+                    fontSize: 11,
+                    letterSpacing: 1.4,
+                    textTransform: 'uppercase',
+                    color: '#c19c77',
+                  }}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-accent w-full py-3.5 text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg shadow-amber-600/30 mt-2"
-            >
-              {loading ? <LoadingSpinner size="sm" /> : 'Sign In to Account'}
+            <button type="submit" className="motela-btn" style={{ width: '100%' }} disabled={loading}>
+              {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
 
-          {/* Demo account quick fill */}
-          <div className="pt-4 border-t border-slate-100 text-center space-y-2">
-            <p className="text-[11px] text-slate-400 font-medium">Quick Demo Autofill:</p>
-            <div className="flex justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('guest')}
-                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-medium transition-colors cursor-pointer"
-              >
-                Guest
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('receptionist')}
-                className="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer border border-blue-200"
-              >
-                Receptionist
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin')}
-                className="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer border border-amber-200"
-              >
-                Admin
-              </button>
+          <div style={{ marginTop: 28, paddingTop: 22, borderTop: '1px solid #eee' }}>
+            <p className="motela-eyebrow" style={{ textAlign: 'center', marginBottom: 14 }}>
+              Demo accounts
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  className="motela-chip"
+                  onClick={() => setFormData({ email: account.email, password: account.password })}
+                >
+                  {account.label}
+                </button>
+              ))}
             </div>
           </div>
-
-          <p className="text-center text-xs text-slate-500 pt-2">
-            Don't have an account yet?{' '}
-            <Link to="/register" className="text-amber-600 font-bold hover:underline">
-              Create Account
-            </Link>
-          </p>
         </div>
+
+        <p className="motela-text" style={{ textAlign: 'center', marginTop: 24, fontSize: 14 }}>
+          No account yet?{' '}
+          <Link to="/register" style={{ color: '#c19c77', textDecoration: 'underline' }}>
+            Create one
+          </Link>
+        </p>
       </div>
-    </div>
+    </section>
   );
 };
 

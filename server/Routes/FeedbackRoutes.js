@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const feedbackController = require("../Controller/FeedController");
+const authMiddleware = require("../Middleware/authMiddleware");
+const { authorizeRoles } = require("../Middleware/roleMiddleware");
 
-router.post("/", feedbackController.createFeedback);
-router.get("/", feedbackController.getFeedbacks);
-router.get("/:id", feedbackController.getFeedbackById);
-router.put("/:id", feedbackController.updateFeedback);
-router.delete("/:id", feedbackController.deleteFeedback);
+// Any authenticated guest can leave feedback; only staff moderate it.
+router.post("/", authMiddleware, feedbackController.createFeedback);
+router.get("/", authMiddleware, authorizeRoles("admin", "manager"), feedbackController.getFeedbacks);
+router.get("/:id", authMiddleware, authorizeRoles("admin", "manager"), feedbackController.getFeedbackById);
+router.put("/:id", authMiddleware, authorizeRoles("admin", "manager"), feedbackController.updateFeedback);
+router.delete("/:id", authMiddleware, authorizeRoles("admin", "manager"), feedbackController.deleteFeedback);
 
 module.exports = router;
