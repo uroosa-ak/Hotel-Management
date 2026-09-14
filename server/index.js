@@ -30,14 +30,14 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-// CORS: only the configured client origin(s) may make credentialed requests.
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+// CORS: allow configured client origin(s) and any local dev server port.
+const configuredOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .split(',')
   .map((origin) => origin.trim());
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || configuredOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));

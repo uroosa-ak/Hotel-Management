@@ -23,11 +23,9 @@ const Login = () => {
 
   const from = location.state?.from?.pathname || '/';
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleLoginSubmit = async (credentials) => {
     setError('');
-
-    const emailErr = validateEmail(formData.email);
+    const emailErr = validateEmail(credentials.email);
     if (emailErr) {
       setError(emailErr);
       return;
@@ -35,18 +33,28 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await login(formData);
+      const res = await login(credentials);
       const userRole = res?.user?.role || res?.role;
-      if (['admin', 'manager', 'receptionist', 'housekeeping'].includes(userRole) && from === '/') {
+      if (['admin', 'manager', 'receptionist', 'housekeeping'].includes(userRole)) {
         navigate('/admin', { replace: true });
       } else {
-        navigate(from, { replace: true });
+        navigate(from === '/' ? '/my-bookings' : from, { replace: true });
       }
     } catch (err) {
       setError(err?.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleLoginSubmit(formData);
+  };
+
+  const handleDemoLogin = (account) => {
+    setFormData({ email: account.email, password: account.password });
+    handleLoginSubmit({ email: account.email, password: account.password });
   };
 
   return (
@@ -130,7 +138,7 @@ const Login = () => {
                   key={account.email}
                   type="button"
                   className="motela-chip"
-                  onClick={() => setFormData({ email: account.email, password: account.password })}
+                  onClick={() => handleDemoLogin(account)}
                 >
                   {account.label}
                 </button>

@@ -56,9 +56,11 @@ import {
   LuShieldCheck as ShieldCheck,
   LuPrinter as Printer,
   LuWrench as Wrench,
+  LuExternalLink as ExternalLink,
 } from 'react-icons/lu';
 
 export {
+  ExternalLink,
   BedDouble,
   Users,
   Mail,
