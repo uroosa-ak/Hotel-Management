@@ -3,7 +3,7 @@
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PHONE_REGEX = /^\+?[0-9\s-]{10,16}$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-const ROOM_NUMBER_REGEX = /^[A-Za-z0-9-]{1,10}$/;
+const ROOM_NUMBER_REGEX = /^[A-Za-z0-9\s-]{1,20}$/;
 const CNIC_REGEX = /^[0-9]{5}-[0-9]{7}-[0-9]$/;
 
 function validateEmail(email) {

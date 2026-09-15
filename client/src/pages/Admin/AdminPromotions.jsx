@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Tag } from '../../components/common/icons';
+import { Plus, Trash2, Tag, Edit } from '../../components/common/icons';
 import promotionService from '../../services/promotionService';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -11,6 +11,7 @@ const AdminPromotions = () => {
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
 
@@ -26,15 +27,50 @@ const AdminPromotions = () => {
 
   useEffect(() => { fetchPromos(); }, []);
 
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setError('');
+    setShowModal(true);
+  };
+
+  const openEdit = (p) => {
+    setEditingId(p._id);
+    setForm({
+      code: p.code || '',
+      description: p.description || '',
+      discountPercentage: p.discountPercentage || '',
+      validFrom: p.validFrom ? new Date(p.validFrom).toISOString().split('T')[0] : '',
+      validTo: p.validTo ? new Date(p.validTo).toISOString().split('T')[0] : '',
+      isActive: p.isActive !== false,
+    });
+    setError('');
+    setShowModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      await promotionService.create({ ...form, discountPercentage: Number(form.discountPercentage) });
+      const payload = {
+        code: form.code.toUpperCase().trim(),
+        description: form.description,
+        discountPercentage: Number(form.discountPercentage),
+        isActive: form.isActive,
+      };
+      if (form.validFrom) payload.validFrom = form.validFrom;
+      if (form.validTo) payload.validTo = form.validTo;
+
+      if (editingId) {
+        await promotionService.update(editingId, payload);
+      } else {
+        await promotionService.create(payload);
+      }
       setShowModal(false);
       setForm(emptyForm);
       await fetchPromos();
     } catch (err) {
-      setError(err.message || 'Failed to save promotion');
+      setError(err.response?.data?.message || err.message || 'Failed to save promotion');
     }
   };
 
@@ -63,7 +99,7 @@ const AdminPromotions = () => {
         title="Promotions & Discounts"
         subtitle="Create promo codes and manage discount campaigns applied at booking time."
         action={
-          <button onClick={() => { setForm(emptyForm); setError(''); setShowModal(true); }} className="btn-accent text-xs flex items-center gap-1.5 shadow-sm cursor-pointer">
+          <button onClick={openCreate} className="btn-accent text-xs flex items-center gap-1.5 shadow-sm cursor-pointer">
             <Plus size={16} /> <span>New Promo Code</span>
           </button>
         }
@@ -103,7 +139,10 @@ const AdminPromotions = () => {
                         <StatusBadge status={p.isActive ? 'active' : 'inactive'} />
                       </button>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <button onClick={() => openEdit(p)} className="p-1.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-colors cursor-pointer" title="Edit">
+                        <Edit size={14} />
+                      </button>
                       <button onClick={() => handleDelete(p._id)} className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl cursor-pointer" title="Delete">
                         <Trash2 size={14} />
                       </button>
@@ -119,7 +158,7 @@ const AdminPromotions = () => {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
-            <h3 className="text-base font-bold text-slate-900 font-serif">New Promotion</h3>
+            <h3 className="text-base font-bold text-slate-900 font-serif">{editingId ? 'Edit Promotion' : 'New Promotion'}</h3>
             {error && <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
@@ -146,7 +185,7 @@ const AdminPromotions = () => {
               </div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
-                <button type="submit" className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-sm">Create</button>
+                <button type="submit" className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-sm">{editingId ? 'Save Changes' : 'Create'}</button>
               </div>
             </form>
           </div>

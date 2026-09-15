@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Package } from '../../components/common/icons';
+import { Plus, Trash2, Package, Edit } from '../../components/common/icons';
 import inventoryService from '../../services/inventoryService';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -13,6 +13,7 @@ const AdminInventory = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
 
@@ -28,16 +29,41 @@ const AdminInventory = () => {
 
   useEffect(() => { fetchItems(); }, []);
 
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setError('');
+    setShowModal(true);
+  };
+
+  const openEdit = (it) => {
+    setEditingId(it._id);
+    setForm({
+      itemName: it.itemName || '',
+      quantity: it.quantity ?? '',
+      category: it.category || '',
+      status: it.status || 'available',
+    });
+    setError('');
+    setShowModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const quantity = Number(form.quantity);
-      await inventoryService.create({ ...form, quantity, status: deriveStatus(quantity) });
+      const payload = { ...form, quantity, status: deriveStatus(quantity) };
+      if (editingId) {
+        await inventoryService.update(editingId, payload);
+      } else {
+        await inventoryService.create(payload);
+      }
       setShowModal(false);
       setForm(emptyForm);
       await fetchItems();
     } catch (err) {
-      setError(err.message || 'Failed to save item');
+      setError(err.response?.data?.message || err.message || 'Failed to save item');
     }
   };
 
@@ -67,7 +93,7 @@ const AdminInventory = () => {
         title="Inventory & Supplies"
         subtitle="Track housekeeping and maintenance stock levels; low-stock items are flagged automatically."
         action={
-          <button onClick={() => { setForm(emptyForm); setError(''); setShowModal(true); }} className="btn-accent text-xs flex items-center gap-1.5 shadow-sm cursor-pointer">
+          <button onClick={openCreate} className="btn-accent text-xs flex items-center gap-1.5 shadow-sm cursor-pointer">
             <Plus size={16} /> <span>Add Item</span>
           </button>
         }
@@ -107,7 +133,10 @@ const AdminInventory = () => {
                     <td className="px-6 py-4">
                       <StatusBadge status={it.status} />
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <button onClick={() => openEdit(it)} className="p-1.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-colors cursor-pointer" title="Edit">
+                        <Edit size={14} />
+                      </button>
                       <button onClick={() => handleDelete(it._id)} className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl cursor-pointer" title="Delete">
                         <Trash2 size={14} />
                       </button>
@@ -123,7 +152,7 @@ const AdminInventory = () => {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
-            <h3 className="text-base font-bold text-slate-900 font-serif">Add Inventory Item</h3>
+            <h3 className="text-base font-bold text-slate-900 font-serif">{editingId ? 'Edit Inventory Item' : 'Add Inventory Item'}</h3>
             {error && <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
@@ -142,7 +171,7 @@ const AdminInventory = () => {
               </div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
-                <button type="submit" className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-sm">Add</button>
+                <button type="submit" className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-sm">{editingId ? 'Save Changes' : 'Add'}</button>
               </div>
             </form>
           </div>

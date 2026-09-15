@@ -28,7 +28,7 @@ function mapRoomToClient(room) {
 // Create room
 exports.createRoom = async (req, res) => {
   try {
-    const { roomNumber, name, roomType, type, price, pricePerNight, floor, capacity, size, bedType, view, description, amenities, status, images } = req.body;
+    const { roomNumber, name, roomType, type, price, pricePerNight, floor, capacity, size, bedType, view, description, amenities, status, images, pricingRules } = req.body;
 
     const finalRoomNumber = roomNumber ? String(roomNumber).trim() : null;
     if (!validateRoomNumber(finalRoomNumber)) {
@@ -45,28 +45,28 @@ exports.createRoom = async (req, res) => {
       return res.status(409).json({ message: `Room number ${finalRoomNumber} already exists.` });
     }
 
-    const rawType = (roomType || type || 'deluxe').toLowerCase();
-    const validTypes = ['single', 'double', 'deluxe', 'suite'];
-    const finalType = validTypes.includes(rawType) ? rawType : 'deluxe';
-
+    const rawType = (roomType || type || 'deluxe').toLowerCase().trim();
     const imageList = Array.isArray(images) ? images : (images ? [images] : []);
 
     const newRoom = await Room.create({
       roomNumber: finalRoomNumber,
-      name: (name && name.trim()) || `${finalType.charAt(0).toUpperCase() + finalType.slice(1)} Room ${finalRoomNumber}`,
-      roomType: finalType,
-      floor: floor || 1,
-      capacity: capacity || 2,
-      size: size || 30,
-      bedType: bedType || 'Queen',
+      name: (name && name.trim()) || `${rawType.charAt(0).toUpperCase() + rawType.slice(1)} Room ${finalRoomNumber}`,
+      roomType: rawType,
+      floor: Number(floor) || 1,
+      capacity: Number(capacity) || 2,
+      size: Number(size) || 30,
+      bedType: bedType || 'King',
       view: view || 'City',
       price: Number(finalPrice),
+      basePricePerNight: Number(finalPrice),
       status: status || 'available',
+      currentStatus: status || 'available',
       availability: status ? status === 'available' : true,
       description: description || 'Luxurious accommodations with premium amenities.',
       amenities: Array.isArray(amenities) ? amenities : ['High-speed Wi-Fi', 'Air Conditioning'],
       images: imageList,
-      image: imageList[0] || '/images/rooms/room-01.jpg'
+      image: imageList[0] || '/images/rooms/room-01.jpg',
+      pricingRules: pricingRules || { weekendMultiplier: 1, seasonalMultiplier: 1, holidayMultiplier: 1, extraGuestFee: 0, extraBedFee: 0 }
     });
 
     res.status(201).json(mapRoomToClient(newRoom));
@@ -114,7 +114,7 @@ exports.getRoomById = async (req, res) => {
 // Update room
 exports.updateRoom = async (req, res) => {
   try {
-    const { roomNumber, name, roomType, type, price, pricePerNight, floor, capacity, size, bedType, view, description, amenities, status, images } = req.body;
+    const { roomNumber, name, roomType, type, price, pricePerNight, floor, capacity, size, bedType, view, description, amenities, status, images, pricingRules } = req.body;
     const update = {};
 
     if (roomNumber !== undefined) {
@@ -130,21 +130,23 @@ exports.updateRoom = async (req, res) => {
         return res.status(400).json({ message: "Invalid room price." });
       }
       update.price = Number(finalPrice);
+      update.basePricePerNight = Number(finalPrice);
     }
 
     if (roomType || type) {
-      const rawType = (roomType || type).toLowerCase();
-      update.roomType = ['single', 'double', 'deluxe', 'suite'].includes(rawType) ? rawType : 'deluxe';
+      const rawType = (roomType || type).toLowerCase().trim();
+      update.roomType = rawType;
     }
 
     if (name !== undefined) update.name = name;
-    if (floor !== undefined) update.floor = floor;
-    if (capacity !== undefined) update.capacity = capacity;
-    if (size !== undefined) update.size = size;
+    if (floor !== undefined) update.floor = Number(floor);
+    if (capacity !== undefined) update.capacity = Number(capacity);
+    if (size !== undefined) update.size = Number(size);
     if (bedType !== undefined) update.bedType = bedType;
     if (view !== undefined) update.view = view;
     if (description !== undefined) update.description = description;
     if (amenities !== undefined) update.amenities = amenities;
+    if (pricingRules !== undefined) update.pricingRules = pricingRules;
     if (images !== undefined) {
       const imageList = Array.isArray(images) ? images : (images ? [images] : []);
       update.images = imageList;

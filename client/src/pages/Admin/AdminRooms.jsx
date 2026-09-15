@@ -13,6 +13,8 @@ const AdminRooms = () => {
   // Modal form state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
+  const [modalError, setModalError] = useState('');
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     roomNumber: '',
@@ -49,6 +51,7 @@ const AdminRooms = () => {
 
   const handleOpenAdd = () => {
     setEditingRoom(null);
+    setModalError('');
     setFormData({
       name: '',
       roomNumber: '',
@@ -69,6 +72,7 @@ const AdminRooms = () => {
 
   const handleOpenEdit = (room) => {
     setEditingRoom(room);
+    setModalError('');
     setFormData({
       name: room.name || '',
       roomNumber: room.roomNumber || '',
@@ -80,8 +84,8 @@ const AdminRooms = () => {
       view: room.view || 'Ocean',
       isAvailable: room.isAvailable !== false,
       description: room.description || '',
-      amenities: Array.isArray(room.amenities) ? room.amenities.join(', ') : '',
-      images: Array.isArray(room.images) ? room.images.join(', ') : '',
+      amenities: Array.isArray(room.amenities) ? room.amenities.join(', ') : (room.amenities || ''),
+      images: Array.isArray(room.images) ? room.images.join(', ') : (room.images || ''),
       pricingRules: {
         weekendMultiplier: room.pricingRules?.weekendMultiplier ?? 1,
         seasonalMultiplier: room.pricingRules?.seasonalMultiplier ?? 1,
@@ -95,37 +99,51 @@ const AdminRooms = () => {
 
   const handleSaveRoom = async (e) => {
     e.preventDefault();
-    const payload = {
-      ...formData,
-      pricePerNight: Number(formData.pricePerNight),
-      capacity: Number(formData.capacity),
-      size: Number(formData.size),
-      amenities: formData.amenities.split(',').map((s) => s.trim()).filter(Boolean),
-      images: formData.images.split(',').map((s) => s.trim()).filter(Boolean),
-      pricingRules: {
-        weekendMultiplier: Number(formData.pricingRules.weekendMultiplier) || 1,
-        seasonalMultiplier: Number(formData.pricingRules.seasonalMultiplier) || 1,
-        holidayMultiplier: Number(formData.pricingRules.holidayMultiplier) || 1,
-        extraGuestFee: Number(formData.pricingRules.extraGuestFee) || 0,
-        extraBedFee: Number(formData.pricingRules.extraBedFee) || 0,
-      },
-    };
+    setModalError('');
+    setSaving(true);
+    try {
+      const payload = {
+        ...formData,
+        roomType: formData.type,
+        price: Number(formData.pricePerNight),
+        pricePerNight: Number(formData.pricePerNight),
+        capacity: Number(formData.capacity),
+        size: Number(formData.size),
+        amenities: typeof formData.amenities === 'string' ? formData.amenities.split(',').map((s) => s.trim()).filter(Boolean) : formData.amenities,
+        images: typeof formData.images === 'string' ? formData.images.split(',').map((s) => s.trim()).filter(Boolean) : formData.images,
+        pricingRules: {
+          weekendMultiplier: Number(formData.pricingRules.weekendMultiplier) || 1,
+          seasonalMultiplier: Number(formData.pricingRules.seasonalMultiplier) || 1,
+          holidayMultiplier: Number(formData.pricingRules.holidayMultiplier) || 1,
+          extraGuestFee: Number(formData.pricingRules.extraGuestFee) || 0,
+          extraBedFee: Number(formData.pricingRules.extraBedFee) || 0,
+        },
+      };
 
-    if (editingRoom) {
-      await roomService.update(editingRoom._id, payload);
-    } else {
-      await roomService.create(payload);
+      if (editingRoom) {
+        await roomService.update(editingRoom._id, payload);
+      } else {
+        await roomService.create(payload);
+      }
+
+      setModalOpen(false);
+      await fetchRooms();
+    } catch (err) {
+      setModalError(err.response?.data?.message || err.message || 'Failed to save room details.');
+    } finally {
+      setSaving(false);
     }
-
-    setModalOpen(false);
-    await fetchRooms();
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteModal.roomId) return;
-    await roomService.delete(deleteModal.roomId);
-    setDeleteModal({ isOpen: false, roomId: null });
-    await fetchRooms();
+    try {
+      await roomService.delete(deleteModal.roomId);
+      setDeleteModal({ isOpen: false, roomId: null });
+      await fetchRooms();
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || 'Failed to delete room.');
+    }
   };
 
   return (
@@ -223,7 +241,11 @@ const AdminRooms = () => {
               >
                 <X size={20} />
               </button>
-            </div>
+            {modalError && (
+              <div className="mb-4 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3">
+                {modalError}
+              </div>
+            )}
 
             <form onSubmit={handleSaveRoom} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -406,8 +428,8 @@ const AdminRooms = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-accent text-xs font-bold cursor-pointer">
-                  {editingRoom ? 'Update Room' : 'Add Room'}
+                <button type="submit" disabled={saving} className="btn-accent text-xs font-bold cursor-pointer disabled:opacity-60">
+                  {saving ? 'Saving...' : editingRoom ? 'Update Room' : 'Add Room'}
                 </button>
               </div>
             </form>
