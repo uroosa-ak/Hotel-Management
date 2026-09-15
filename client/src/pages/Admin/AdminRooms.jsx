@@ -26,6 +26,7 @@ const AdminRooms = () => {
     description: '',
     amenities: 'Wi-Fi, Balcony, Mini Bar, Smart TV',
     images: '/images/rooms/room-01.jpg',
+    pricingRules: { weekendMultiplier: 1, seasonalMultiplier: 1, holidayMultiplier: 1, extraGuestFee: 0, extraBedFee: 0 },
   });
 
   // Delete dialog state
@@ -61,6 +62,7 @@ const AdminRooms = () => {
       description: 'Spacious suite with luxury bedding and amenities.',
       amenities: 'High-speed Wi-Fi, Balcony, Mini Bar, Smart TV, Room Service',
       images: '/images/rooms/room-01.jpg',
+      pricingRules: { weekendMultiplier: 1, seasonalMultiplier: 1, holidayMultiplier: 1, extraGuestFee: 0, extraBedFee: 0 },
     });
     setModalOpen(true);
   };
@@ -80,6 +82,13 @@ const AdminRooms = () => {
       description: room.description || '',
       amenities: Array.isArray(room.amenities) ? room.amenities.join(', ') : '',
       images: Array.isArray(room.images) ? room.images.join(', ') : '',
+      pricingRules: {
+        weekendMultiplier: room.pricingRules?.weekendMultiplier ?? 1,
+        seasonalMultiplier: room.pricingRules?.seasonalMultiplier ?? 1,
+        holidayMultiplier: room.pricingRules?.holidayMultiplier ?? 1,
+        extraGuestFee: room.pricingRules?.extraGuestFee ?? 0,
+        extraBedFee: room.pricingRules?.extraBedFee ?? 0,
+      },
     });
     setModalOpen(true);
   };
@@ -93,6 +102,13 @@ const AdminRooms = () => {
       size: Number(formData.size),
       amenities: formData.amenities.split(',').map((s) => s.trim()).filter(Boolean),
       images: formData.images.split(',').map((s) => s.trim()).filter(Boolean),
+      pricingRules: {
+        weekendMultiplier: Number(formData.pricingRules.weekendMultiplier) || 1,
+        seasonalMultiplier: Number(formData.pricingRules.seasonalMultiplier) || 1,
+        holidayMultiplier: Number(formData.pricingRules.holidayMultiplier) || 1,
+        extraGuestFee: Number(formData.pricingRules.extraGuestFee) || 0,
+        extraBedFee: Number(formData.pricingRules.extraBedFee) || 0,
+      },
     };
 
     if (editingRoom) {
@@ -325,6 +341,36 @@ const AdminRooms = () => {
                   value={formData.amenities}
                   onChange={(e) => setFormData({ ...formData, amenities: e.target.value })}
                 />
+              </div>
+
+              <div className="border border-slate-200 rounded-xl p-3">
+                <p className="text-xs font-bold text-slate-700 mb-2">Dynamic Pricing Rules</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">Weekend Multiplier</label>
+                    <input type="number" step="0.05" min="1" className="input-field py-1.5 text-xs"
+                      value={formData.pricingRules.weekendMultiplier}
+                      onChange={(e) => setFormData({ ...formData, pricingRules: { ...formData.pricingRules, weekendMultiplier: e.target.value } })} />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">Seasonal Multiplier</label>
+                    <input type="number" step="0.05" min="1" className="input-field py-1.5 text-xs"
+                      value={formData.pricingRules.seasonalMultiplier}
+                      onChange={(e) => setFormData({ ...formData, pricingRules: { ...formData.pricingRules, seasonalMultiplier: e.target.value } })} />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">Extra Guest Fee / Night</label>
+                    <input type="number" step="1" min="0" className="input-field py-1.5 text-xs"
+                      value={formData.pricingRules.extraGuestFee}
+                      onChange={(e) => setFormData({ ...formData, pricingRules: { ...formData.pricingRules, extraGuestFee: e.target.value } })} />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">Extra Bed Fee / Night</label>
+                    <input type="number" step="1" min="0" className="input-field py-1.5 text-xs"
+                      value={formData.pricingRules.extraBedFee}
+                      onChange={(e) => setFormData({ ...formData, pricingRules: { ...formData.pricingRules, extraBedFee: e.target.value } })} />
+                  </div>
+                </div>
               </div>
 
               <div>

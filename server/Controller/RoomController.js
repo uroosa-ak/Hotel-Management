@@ -153,7 +153,14 @@ exports.updateRoom = async (req, res) => {
 
     if (status !== undefined) {
       update.status = status;
+      update.currentStatus = status;
       update.availability = status === 'available';
+      try {
+        const socketService = require('../services/socketService');
+        socketService.emitRoomStatus(req.params.id, status, req.user?.firstName || 'Staff');
+      } catch (sockErr) {
+        // Socket broadcast fallback
+      }
     }
 
     const updated = await Room.findByIdAndUpdate(req.params.id, update, { new: true });

@@ -37,6 +37,20 @@ const AdminBookings = lazy(() => import('../pages/Admin/AdminBookings'));
 const AdminUsers = lazy(() => import('../pages/Admin/AdminUsers'));
 const AdminCheckInOut = lazy(() => import('../pages/Admin/AdminCheckInOut'));
 const AdminHousekeeping = lazy(() => import('../pages/Admin/AdminHousekeeping'));
+const AdminGuests = lazy(() => import('../pages/Admin/AdminGuests'));
+const AdminPayments = lazy(() => import('../pages/Admin/AdminPayments'));
+const AdminFeedback = lazy(() => import('../pages/Admin/AdminFeedback'));
+const AdminPromotions = lazy(() => import('../pages/Admin/AdminPromotions'));
+const AdminTaxes = lazy(() => import('../pages/Admin/AdminTaxes'));
+const AdminInventory = lazy(() => import('../pages/Admin/AdminInventory'));
+const AdminReports = lazy(() => import('../pages/Admin/AdminReports'));
+const AdminSettings = lazy(() => import('../pages/Admin/AdminSettings'));
+const AdminSecurity = lazy(() => import('../pages/Admin/AdminSecurity'));
+const AdminAuditLogs = lazy(() => import('../pages/Admin/AdminAuditLogs'));
+const AdminRolesView = lazy(() => import('../pages/Admin/AdminRolesView'));
+const GuestServices = lazy(() => import('../pages/Guest/GuestServices'));
+const GuestNotifications = lazy(() => import('../pages/Guest/GuestNotifications'));
+const GuestFeedbackHistory = lazy(() => import('../pages/Guest/GuestFeedbackHistory'));
 
 const AppRoutes = () => {
   return (
@@ -64,6 +78,30 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="my-bookings" element={<MyBookings />} />
           <Route path="profile" element={<Profile />} />
+          <Route
+            path="my-services"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <GuestServices />
+              </Suspense>
+            }
+          />
+          <Route
+            path="notifications"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <GuestNotifications />
+              </Suspense>
+            }
+          />
+          <Route
+            path="feedback-history"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <GuestFeedbackHistory />
+              </Suspense>
+            }
+          />
         </Route>
       </Route>
 
@@ -118,6 +156,94 @@ const AppRoutes = () => {
             element={
               <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
                 <AdminUsers />
+              </Suspense>
+            }
+          />
+          <Route
+            path="guests"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminGuests />
+              </Suspense>
+            }
+          />
+          <Route
+            path="payments"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminPayments />
+              </Suspense>
+            }
+          />
+          <Route
+            path="feedback"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminFeedback />
+              </Suspense>
+            }
+          />
+          <Route
+            path="promotions"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminPromotions />
+              </Suspense>
+            }
+          />
+          <Route
+            path="taxes"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminTaxes />
+              </Suspense>
+            }
+          />
+          <Route
+            path="inventory"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminInventory />
+              </Suspense>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminReports />
+              </Suspense>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminSettings />
+              </Suspense>
+            }
+          />
+          <Route
+            path="security"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminSecurity />
+              </Suspense>
+            }
+          />
+          <Route
+            path="audit-logs"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminAuditLogs />
+              </Suspense>
+            }
+          />
+          <Route
+            path="roles"
+            element={
+              <Suspense fallback={<LoadingSpinner fullScreen text="Loading..." />}>
+                <AdminRolesView />
               </Suspense>
             }
           />

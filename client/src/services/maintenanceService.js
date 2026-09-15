@@ -24,6 +24,16 @@ const maintenanceService = {
     const { data } = await api.delete(`/maintenance/${id}`);
     return data;
   },
+
+  assign: async (id, assignedTo) => {
+    const { data } = await api.patch(`/maintenance/${id}/assign`, { assignedTo });
+    return data;
+  },
+
+  resolve: async (id, resolutionNotes) => {
+    const { data } = await api.patch(`/maintenance/${id}/resolve`, { resolutionNotes });
+    return data;
+  },
 };
 
 export default maintenanceService;

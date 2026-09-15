@@ -8,6 +8,8 @@ const { authorizeRoles } = require("../Middleware/roleMiddleware");
 router.post("/", authMiddleware, maintenanceController.createRequest);
 router.get("/", authMiddleware, authorizeRoles("admin", "manager", "housekeeping"), maintenanceController.getAllRequests);
 router.put("/:id", authMiddleware, authorizeRoles("admin", "manager", "housekeeping"), maintenanceController.updateRequest);
+router.patch("/:id/assign", authMiddleware, authorizeRoles("admin", "manager", "housekeeping"), maintenanceController.assignRequest);
+router.patch("/:id/resolve", authMiddleware, authorizeRoles("admin", "manager", "housekeeping"), maintenanceController.resolveRequest);
 router.delete("/:id", authMiddleware, authorizeRoles("admin", "manager"), maintenanceController.deleteRequest);
 
 module.exports = router;

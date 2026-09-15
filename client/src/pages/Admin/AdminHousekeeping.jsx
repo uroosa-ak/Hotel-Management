@@ -25,9 +25,11 @@ const AdminHousekeeping = () => {
   const [ticketForm, setTicketForm] = useState({
     roomNumber: '',
     issue: '',
-    severity: 'Medium',
+    priority: 'medium',
     notes: '',
   });
+  const [resolvingId, setResolvingId] = useState(null);
+  const [resolutionNotes, setResolutionNotes] = useState('');
 
   const fetchData = async () => {
     try {
@@ -64,7 +66,7 @@ const AdminHousekeeping = () => {
       await maintenanceService.create({
         room: targetRoom?._id || null,
         issue: ticketForm.issue,
-        severity: ticketForm.severity,
+        priority: ticketForm.priority,
         notes: ticketForm.notes,
         status: 'pending',
       });
@@ -72,21 +74,37 @@ const AdminHousekeeping = () => {
         await roomService.update(targetRoom._id, { status: 'maintenance' });
       }
       setShowNewTicketModal(false);
-      setTicketForm({ roomNumber: '', issue: '', severity: 'Medium', notes: '' });
+      setTicketForm({ roomNumber: '', issue: '', priority: 'medium', notes: '' });
       await fetchData();
     } catch (err) {
       console.error('Failed to create ticket', err);
     }
   };
 
-  const handleTicketStatus = async (ticketId, status) => {
+  const handleAssignToMe = async (ticketId) => {
     try {
-      await maintenanceService.update(ticketId, { status });
+      await maintenanceService.assign(ticketId);
       await fetchData();
     } catch (err) {
-      console.error('Failed to update ticket status', err);
+      console.error('Failed to assign ticket', err);
     }
   };
+
+  const handleResolve = async (ticketId) => {
+    try {
+      await maintenanceService.resolve(ticketId, resolutionNotes);
+      setResolvingId(null);
+      setResolutionNotes('');
+      await fetchData();
+    } catch (err) {
+      console.error('Failed to resolve ticket', err);
+    }
+  };
+
+  const priorityOrder = { emergency: 0, high: 1, medium: 2, low: 3 };
+  const sortedRequests = [...requests].sort(
+    (a, b) => (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2)
+  );
 
   return (
     <div className="space-y-6">
@@ -180,8 +198,7 @@ const AdminHousekeeping = () => {
               <thead className="bg-slate-50 text-slate-700 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
                   <th className="px-6 py-4">Suite / Room</th>
-                  <th className="px-6 py-4">Type</th>
-                  <th className="px-6 py-4">Floor</th>
+                  <th className="px-6 py-4">Priority Queue</th>
                   <th className="px-6 py-4">Current Status</th>
                   <th className="px-6 py-4 text-right">Housekeeping Action</th>
                 </tr>
@@ -189,15 +206,27 @@ const AdminHousekeeping = () => {
               <tbody className="divide-y divide-slate-100">
                 {rooms.map((r) => (
                   <tr key={r._id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-slate-900 flex items-center gap-2">
-                      <BedDouble size={16} className="text-slate-400" />
-                      <span>{r.name || `Room ${r.roomNumber}`}</span>
-                      <span className="text-[11px] text-slate-400 font-normal font-mono">
-                        (#{r.roomNumber})
+                    <td className="px-6 py-4 font-semibold text-slate-900">
+                      Room {r.roomNumber}
+                      <span className="block text-[11px] text-slate-400 font-normal">
+                        {r.name || r.roomType} • Floor {r.floor || 1}
                       </span>
                     </td>
-                    <td className="px-6 py-4 capitalize">{r.type || r.roomType}</td>
-                    <td className="px-6 py-4">Floor {r.floor || 1}</td>
+                    <td className="px-6 py-4">
+                      {r.status === 'cleaning' ? (
+                        <span className="px-2.5 py-1 bg-rose-100 text-rose-800 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-rose-200">
+                          {r.cleaningPriority === 'urgent_vip' ? 'VIP Priority' : 'Check-out Dirty (High)'}
+                        </span>
+                      ) : r.status === 'occupied' ? (
+                        <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-semibold uppercase">
+                          Stay-over In-House
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-semibold uppercase">
+                          Inspected & Ready
+                        </span>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       <StatusBadge status={r.status || 'available'} />
                     </td>
@@ -207,20 +236,27 @@ const AdminHousekeeping = () => {
                           onClick={() => handleUpdateRoomStatus(r._id, 'available')}
                           className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                         >
-                          Mark Clean & Ready
+                          Mark Inspected / Ready
                         </button>
                       )}
                       {r.status === 'available' && (
                         <button
                           onClick={() => handleUpdateRoomStatus(r._id, 'cleaning')}
-                          className="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                          className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold transition-all cursor-pointer"
                         >
-                          Send to Cleaning
+                          Start Cleaning
                         </button>
                       )}
-                      {r.status === 'occupied' && (
-                        <span className="text-[11px] text-slate-400 font-medium">Guest In-House</span>
-                      )}
+                      <button
+                        onClick={() => {
+                          setTicketForm((prev) => ({ ...prev, roomNumber: r.roomNumber }));
+                          setShowNewTicketModal(true);
+                        }}
+                        className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-medium transition-colors cursor-pointer"
+                        title="Report Damage or Maintenance"
+                      >
+                        Report Damage
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -237,20 +273,21 @@ const AdminHousekeeping = () => {
                 <tr>
                   <th className="px-6 py-4">Ticket / Issue</th>
                   <th className="px-6 py-4">Suite</th>
-                  <th className="px-6 py-4">Severity</th>
+                  <th className="px-6 py-4">Priority</th>
+                  <th className="px-6 py-4">Assigned To</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {requests.length === 0 ? (
+                {sortedRequests.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                    <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
                       No active maintenance tickets recorded.
                     </td>
                   </tr>
                 ) : (
-                  requests.map((t) => (
+                  sortedRequests.map((t) => (
                     <tr key={t._id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4 font-semibold text-slate-900">
                         {t.issue || 'General Maintenance'}
@@ -262,25 +299,61 @@ const AdminHousekeeping = () => {
                         Room {t.room?.roomNumber || 'Assigned'}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2.5 py-1 bg-rose-50 text-rose-700 font-semibold rounded-lg text-[10px] uppercase border border-rose-200">
-                          {t.severity || 'Medium'}
+                        <span
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border ${
+                            t.priority === 'emergency'
+                              ? 'bg-rose-100 text-rose-800 border-rose-300'
+                              : t.priority === 'high'
+                              ? 'bg-orange-50 text-orange-700 border-orange-200'
+                              : t.priority === 'low'
+                              ? 'bg-slate-50 text-slate-600 border-slate-200'
+                              : 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}
+                        >
+                          {t.priority || 'medium'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-[11px]">
+                        {t.assignedTo?.firstName || t.assignedTo?.username || (
+                          <button
+                            onClick={() => handleAssignToMe(t._id)}
+                            className="text-slate-500 hover:text-slate-800 font-semibold underline cursor-pointer"
+                          >
+                            Assign to me
+                          </button>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <StatusBadge status={t.status || 'pending'} />
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {t.status !== 'resolved' ? (
+                        {t.status === 'completed' ? (
+                          <span className="text-emerald-600 font-semibold text-xs flex items-center justify-end gap-1">
+                            <CheckCircle size={14} /> Completed
+                          </span>
+                        ) : resolvingId === t._id ? (
+                          <div className="flex items-center gap-1.5 justify-end">
+                            <input
+                              autoFocus
+                              placeholder="Resolution notes..."
+                              value={resolutionNotes}
+                              onChange={(e) => setResolutionNotes(e.target.value)}
+                              className="input-field py-1.5 text-[11px] w-40"
+                            />
+                            <button
+                              onClick={() => handleResolve(t._id)}
+                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold cursor-pointer"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        ) : (
                           <button
-                            onClick={() => handleTicketStatus(t._id, 'resolved')}
+                            onClick={() => { setResolvingId(t._id); setResolutionNotes(''); }}
                             className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                           >
                             Mark Resolved
                           </button>
-                        ) : (
-                          <span className="text-emerald-600 font-semibold text-xs flex items-center justify-end gap-1">
-                            <CheckCircle size={14} /> Completed
-                          </span>
                         )}
                       </td>
                     </tr>
@@ -321,16 +394,16 @@ const AdminHousekeeping = () => {
                 />
               </div>
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Severity Level</label>
+                <label className="block text-slate-700 font-semibold mb-1">Priority Level</label>
                 <select
-                  value={ticketForm.severity}
-                  onChange={(e) => setTicketForm({ ...ticketForm, severity: e.target.value })}
+                  value={ticketForm.priority}
+                  onChange={(e) => setTicketForm({ ...ticketForm, priority: e.target.value })}
                   className="input-field py-2"
                 >
-                  <option value="Low">Low (Cosmetic / Non-urgent)</option>
-                  <option value="Medium">Medium (Prompt attention needed)</option>
-                  <option value="High">High (Impacting guest comfort)</option>
-                  <option value="Urgent">Urgent (Immediate repair required)</option>
+                  <option value="low">Low (Cosmetic / Non-urgent)</option>
+                  <option value="medium">Medium (Prompt attention needed)</option>
+                  <option value="high">High (Impacting guest comfort)</option>
+                  <option value="emergency">Emergency (Immediate repair required)</option>
                 </select>
               </div>
               <div>

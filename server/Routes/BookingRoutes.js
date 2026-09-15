@@ -28,6 +28,10 @@ routes.patch("/:id/status", authMiddleware, authorizeRoles("admin", "manager", "
 // Cancel booking
 routes.patch("/:id/cancel", authMiddleware, bookingController.cancelBooking);
 
+// Reassign to a different room / extend or shorten stay dates
+routes.patch("/:id/reassign-room", authMiddleware, authorizeRoles("admin", "manager", "receptionist"), bookingController.reassignRoom);
+routes.patch("/:id/dates", authMiddleware, authorizeRoles("admin", "manager", "receptionist"), bookingController.updateStayDates);
+
 // User specific bookings
 routes.get("/user/:userId", authMiddleware, authorizeRoles("admin", "manager", "receptionist"), bookingController.getUserBookings);
 

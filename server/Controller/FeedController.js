@@ -3,8 +3,21 @@ const Feedback = require("../models/Feedback");
 // Create feedback
 exports.createFeedback = async (req, res) => {
   try {
-    const feedback = await Feedback.create(req.body);
+    const feedback = await Feedback.create({
+      ...req.body,
+      guestId: req.body.guestId || req.user?._id,
+    });
     res.status(201).json(feedback);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Guest views only their own submitted feedback
+exports.getMyFeedback = async (req, res) => {
+  try {
+    const feedbacks = await Feedback.find({ guestId: req.user._id }).sort({ createdAt: -1 });
+    res.json(feedbacks);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

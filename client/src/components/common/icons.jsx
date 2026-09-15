@@ -57,6 +57,15 @@ import {
   LuPrinter as Printer,
   LuWrench as Wrench,
   LuExternalLink as ExternalLink,
+  LuQrCode as QrCode,
+  LuUtensils as Utensils,
+  LuTag as Tag,
+  LuPercent as Percent,
+  LuBell as Bell,
+  LuFileText as FileText,
+  LuClipboardList as ClipboardList,
+  LuChartBar as BarChart3,
+  LuShieldAlert as ShieldAlert,
 } from 'react-icons/lu';
 
 export {
@@ -118,4 +127,13 @@ export {
   ShieldCheck,
   Printer,
   Wrench,
+  QrCode,
+  Utensils,
+  Tag,
+  Percent,
+  Bell,
+  FileText,
+  ClipboardList,
+  BarChart3,
+  ShieldAlert,
 };

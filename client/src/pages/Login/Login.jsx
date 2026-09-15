@@ -21,7 +21,10 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/';
+  const queryParams = new URLSearchParams(location.search);
+  const redirectParam = queryParams.get('redirect');
+  const redirectTarget = redirectParam || location.state?.from?.pathname || '/my-bookings';
+  const redirectMessage = location.state?.message || (redirectParam ? 'Please Login First to Book a Room' : '');
 
   const handleLoginSubmit = async (credentials) => {
     setError('');
@@ -38,7 +41,7 @@ const Login = () => {
       if (['admin', 'manager', 'receptionist', 'housekeeping'].includes(userRole)) {
         navigate('/admin', { replace: true });
       } else {
-        navigate(from === '/' ? '/my-bookings' : from, { replace: true });
+        navigate(redirectTarget, { replace: true });
       }
     } catch (err) {
       setError(err?.message || 'Invalid email or password.');
@@ -69,6 +72,11 @@ const Login = () => {
         </div>
 
         <div className="motela-panel">
+          {redirectMessage && (
+            <div className="motela-alert" style={{ background: '#fdf6ed', borderColor: '#c19c77', color: '#8a5a2b', marginBottom: 16 }}>
+              {redirectMessage}
+            </div>
+          )}
           {error && <div className="motela-alert motela-alert--error">{error}</div>}
 
           <form onSubmit={handleSubmit} noValidate>

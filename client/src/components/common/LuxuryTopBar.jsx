@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FiUser, FiCalendar, FiLogOut, FiPhone, FiMapPin, FiShield } from 'react-icons/fi';
+import { FiUser, FiCalendar, FiLogOut, FiPhone, FiMapPin, FiShield, FiBell, FiCoffee } from 'react-icons/fi';
 
 const LuxuryTopBar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -102,6 +102,56 @@ const LuxuryTopBar = () => {
               >
                 <FiCalendar size={13} />
                 My Bookings
+              </Link>
+
+              <Link
+                to="/my-services"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#c19c77')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+              >
+                <FiCoffee size={13} />
+                Services
+              </Link>
+
+              <Link
+                to="/notifications"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#c19c77')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+              >
+                <FiBell size={13} />
+                Notifications
+              </Link>
+
+              <Link
+                to="/feedback-history"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#c19c77')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+              >
+                Feedback
               </Link>
 
               <Link

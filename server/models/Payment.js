@@ -50,7 +50,8 @@ const paymentSchema = new Schema(
         enum:[
             "pending",
             "completed",
-            "failed"
+            "failed",
+            "refunded"
         ],
 
         default:"pending"

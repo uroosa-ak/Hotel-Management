@@ -90,6 +90,13 @@ const Booking = () => {
     e.preventDefault();
     setError('');
 
+    if (!isAuthenticated) {
+      navigate(`/login?redirect=/booking/${room?._id || id || ''}`, {
+        state: { message: 'Please Login First to Book a Room' },
+      });
+      return;
+    }
+
     if (new Date(formData.checkIn) >= new Date(formData.checkOut)) {
       setError('Check-out date must be after check-in date');
       return;

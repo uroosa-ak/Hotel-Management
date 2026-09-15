@@ -1,7 +1,21 @@
 const User = require("../models/User");
+const LoginHistory = require("../models/LoginHistory");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validateEmail, validatePassword, validatePhone } = require("../utils/validators");
+
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
+const recordLogin = (user, email, success, req) => {
+  LoginHistory.create({
+    user: user?._id,
+    email,
+    success,
+    ip: req.ip,
+    userAgent: req.headers["user-agent"] || "",
+  }).catch((err) => console.error("Failed to record login history:", err.message));
+};
 
 const userController = {
   // Register user
@@ -36,8 +50,12 @@ const userController = {
       const hashedPassword = await bcrypt.hash(password, 10);
       const computedUsername = username || (firstName ? `${firstName}_${lastName || ''}`.trim().toLowerCase() : email.split('@')[0]);
 
-      // Only existing admin/manager can assign non-guest roles; defaults to guest
-      const assignedRole = (role && ["admin", "manager", "receptionist", "housekeeping"].includes(role)) ? role : "guest";
+      // Public self-registration can NEVER grant a staff role — this endpoint has
+      // no authenticated caller to check, so any role from the request body is
+      // ignored. Staff accounts are created only via the admin-only createStaff
+      // endpoint below.
+      void role;
+      const assignedRole = "guest";
 
       const newUser = await User.create({
         firstName: firstName || "",
@@ -79,19 +97,39 @@ const userController = {
         return res.status(400).json({ message: "Email and password are required." });
       }
 
-      const user = await User.findOne({ email: email.toLowerCase() });
+      const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
       if (!user) {
+        recordLogin(null, email, false, req);
         return res.status(401).json({ message: "Invalid email or password." });
       }
 
       if (user.isActive === false) {
+        recordLogin(user, email, false, req);
         return res.status(403).json({ message: "This account has been deactivated. Please contact hotel administration." });
       }
 
-      const isMatch = await bcrypt.compare(password, user.password);
+      if (user.lockUntil && user.lockUntil > Date.now()) {
+        recordLogin(user, email, false, req);
+        const minutesLeft = Math.ceil((user.lockUntil - Date.now()) / 60000);
+        return res.status(423).json({ message: `Account temporarily locked due to failed login attempts. Try again in ${minutesLeft} minute(s).` });
+      }
+
+      const isMatch = await user.comparePassword(password);
       if (!isMatch) {
+        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+        if (user.failedLoginAttempts >= MAX_FAILED_ATTEMPTS) {
+          user.lockUntil = new Date(Date.now() + LOCK_DURATION_MS);
+          user.failedLoginAttempts = 0;
+        }
+        await user.save();
+        recordLogin(user, email, false, req);
         return res.status(401).json({ message: "Invalid email or password." });
       }
+
+      user.failedLoginAttempts = 0;
+      user.lockUntil = null;
+      await user.save();
+      recordLogin(user, email, true, req);
 
       const token = jwt.sign(
         { id: user._id, role: user.role },
@@ -115,6 +153,63 @@ const userController = {
       });
     } catch (error) {
       res.status(500).json({ message: error.message || "Login failed." });
+    }
+  },
+
+  // Admin/Manager-only: create a staff account with an explicit role.
+  createStaff: async (req, res) => {
+    try {
+      const { firstName, lastName, username, email, password, phone, contact, role, department } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required." });
+      }
+      if (!validateEmail(email)) {
+        return res.status(400).json({ message: "Please provide a valid email address." });
+      }
+      if (!validatePassword(password)) {
+        return res.status(400).json({
+          message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+        });
+      }
+      const allowedStaffRoles = ["manager", "receptionist", "housekeeping"];
+      // Only a Super Admin may grant the admin role itself; managers may create
+      // any other staff role but not another admin.
+      if (role === "admin" && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Only a Super Admin can create another admin account." });
+      }
+      if (!allowedStaffRoles.includes(role) && role !== "admin") {
+        return res.status(400).json({ message: "Invalid staff role." });
+      }
+
+      const userPhone = phone || contact || "";
+      const existingUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingUser) {
+        return res.status(409).json({ message: "An account with this email already exists." });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const computedUsername = username || (firstName ? `${firstName}_${lastName || ''}`.trim().toLowerCase() : email.split('@')[0]);
+
+      const newUser = await User.create({
+        firstName: firstName || "",
+        lastName: lastName || "",
+        username: computedUsername,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        phone: userPhone,
+        contact: userPhone,
+        role,
+        department: department || "none",
+        isActive: true
+      });
+
+      const userResponse = newUser.toObject();
+      delete userResponse.password;
+
+      res.status(201).json({ message: "Staff account created successfully.", user: userResponse });
+    } catch (error) {
+      res.status(500).json({ message: error.message || "Failed to create staff account." });
     }
   },
 
@@ -217,17 +312,17 @@ const userController = {
         });
       }
 
-      const user = await User.findById(req.user._id);
+      const user = await User.findById(req.user._id).select('+password');
       if (!user) {
         return res.status(404).json({ message: "User not found." });
       }
 
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      const isMatch = await user.comparePassword(currentPassword);
       if (!isMatch) {
         return res.status(401).json({ message: "Current password is incorrect." });
       }
 
-      user.password = await bcrypt.hash(newPassword, 10);
+      user.password = newPassword;
       await user.save();
 
       res.json({ message: "Password changed successfully." });

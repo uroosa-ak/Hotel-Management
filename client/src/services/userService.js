@@ -22,6 +22,11 @@ const userService = {
     return data;
   },
 
+  createStaff: async (staffData) => {
+    const { data } = await api.post('/user/staff', staffData);
+    return data;
+  },
+
   updateUser: async (id, updateData) => {
     const { data } = await api.put(`/user/${id}`, updateData);
     return data;

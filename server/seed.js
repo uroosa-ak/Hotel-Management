@@ -6,6 +6,10 @@
  *   npm run seed -- --reset  - wipes users/rooms/bookings/guests first
  */
 require('dotenv').config();
+const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {}
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 

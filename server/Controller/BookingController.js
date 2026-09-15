@@ -2,6 +2,7 @@ const Booking = require("../models/Booking");
 const Guest = require("../models/Guest");
 const Room = require("../models/Room");
 const User = require("../models/User");
+const { notifyUser, notifyStaff } = require("../utils/notify");
 
 // Mapping helper to translate MongoDB schema structure to client expected structure
 function mapBookingToClient(booking) {
@@ -99,7 +100,25 @@ exports.createBooking = async (req, res) => {
         }
 
         const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
-        const totalAmount = roomDoc.price * nights;
+
+        // Apply weekend/seasonal/holiday multipliers per-night, plus extra-guest fees.
+        const rules = roomDoc.pricingRules || {};
+        let roomCharge = 0;
+        for (let i = 0; i < nights; i++) {
+            const night = new Date(checkInDate);
+            night.setDate(night.getDate() + i);
+            const isWeekend = night.getDay() === 5 || night.getDay() === 6; // Fri/Sat
+            let nightlyRate = roomDoc.price;
+            if (isWeekend && rules.weekendMultiplier) nightlyRate *= rules.weekendMultiplier;
+            if (rules.seasonalMultiplier) nightlyRate *= rules.seasonalMultiplier;
+            roomCharge += nightlyRate;
+        }
+
+        const baseCapacity = (roomDoc.maxOccupancy?.adults || 0) + (roomDoc.maxOccupancy?.children || 0) || roomDoc.capacity || 2;
+        const extraGuests = Math.max(0, (guests || 1) - baseCapacity);
+        const extraGuestCharge = extraGuests * (rules.extraGuestFee || 0) * nights;
+
+        const totalAmount = parseFloat((roomCharge + extraGuestCharge).toFixed(2));
 
         const booking = await Booking.create({
             guest: guestDoc._id,
@@ -113,12 +132,34 @@ exports.createBooking = async (req, res) => {
             specialRequest: specialRequests || ''
         });
 
-        // The room's status tracks its physical state (occupied/cleaning), which
-        // changes at check-in and check-out. A future reservation must not make
-        // the room unbookable for other dates - overlapping stays are rejected
-        // by the conflict check above.
+        // Auto-generate itemized folio invoice matching Blueprint Section 4.4 & 6
+        try {
+            const Invoice = require('../models/Invoice');
+            await Invoice.create({
+                reservationId: booking._id,
+                guestId: req.user?._id || guestDoc._id,
+                lineItems: [{
+                    serviceType: 'room_charge',
+                    description: `Room ${roomDoc.roomNumber} (${roomDoc.roomType}) - ${nights} night(s)`,
+                    unitPrice: roomDoc.price,
+                    quantity: nights,
+                    totalPrice: totalAmount,
+                    recordedBy: req.user?._id || null
+                }],
+                subtotal: totalAmount,
+                grandTotal: totalAmount,
+                balanceDue: totalAmount,
+                paymentStatus: 'pending'
+            });
+        } catch (invErr) {
+            // Safe fallback if invoice fails
+        }
 
         const populated = await Booking.findById(booking._id).populate('guest room');
+
+        notifyUser(req.user._id, `Your reservation for Room ${roomDoc.roomNumber} (${checkIn} to ${checkOut}) has been received and is pending confirmation.`, "info");
+        notifyStaff(`New reservation: Room ${roomDoc.roomNumber} for ${guestDoc.firstName} ${guestDoc.lastName}, ${checkIn} to ${checkOut}.`, "alert");
+
         res.status(201).json(mapBookingToClient(populated));
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -199,13 +240,45 @@ exports.updateBookingStatus = async (req, res) => {
         booking.bookingStatus = normalized;
         await booking.save();
 
+        // Best-effort: resolve the Guest record's matching User account to notify them.
+        try {
+            const guestDoc = await Guest.findById(booking.guest);
+            if (guestDoc) {
+                const guestUser = await User.findOne({ email: guestDoc.email });
+                if (guestUser) {
+                    notifyUser(guestUser._id, `Your reservation status has been updated to "${normalized.replace(/_/g, ' ')}".`, "info");
+                }
+            }
+        } catch (notifyErr) {
+            // Non-critical — never block the status update on a notification failure.
+        }
+
         if (booking.room) {
+            const socketService = require('../services/socketService');
+            const staffName = req.user?.firstName || 'Staff';
+
             if (normalized === 'checked-in' || normalized === 'checked_in') {
-                await Room.findByIdAndUpdate(booking.room, { status: 'occupied', availability: false });
+                await Room.findByIdAndUpdate(booking.room, { status: 'occupied', currentStatus: 'occupied', availability: false });
+                socketService.emitRoomStatus(booking.room, 'occupied', staffName);
             } else if (normalized === 'checked-out' || normalized === 'checked_out') {
-                await Room.findByIdAndUpdate(booking.room, { status: 'cleaning', availability: false });
+                await Room.findByIdAndUpdate(booking.room, { 
+                    status: 'cleaning', 
+                    currentStatus: 'cleaning', 
+                    cleaningPriority: 'checkout_turnaround',
+                    availability: false 
+                });
+                socketService.emitRoomStatus(booking.room, 'cleaning', staffName);
+                socketService.emitMaintenanceAlert({
+                    roomId: booking.room,
+                    taskType: 'routine_cleaning',
+                    priority: 'checkout_turnaround',
+                    description: 'Checkout turnaround cleaning needed immediately.',
+                    reportedBy: req.user?._id,
+                    timestamp: new Date()
+                });
             } else if (normalized === 'cancelled') {
-                await Room.findByIdAndUpdate(booking.room, { status: 'available', availability: true });
+                await Room.findByIdAndUpdate(booking.room, { status: 'available', currentStatus: 'available', availability: true });
+                socketService.emitRoomStatus(booking.room, 'available', staffName);
             }
         }
 
@@ -233,6 +306,96 @@ exports.cancelBooking = async (req, res) => {
         if (booking.room) {
             await Room.findByIdAndUpdate(booking.room, { status: 'available', availability: true });
         }
+
+        notifyStaff(`Reservation for ${booking.guest?.firstName || 'a guest'} was cancelled.`, "alert");
+
+        const populated = await Booking.findById(booking._id).populate('guest room');
+        res.json(mapBookingToClient(populated));
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Reassign an existing booking to a different room, re-validating availability
+exports.reassignRoom = async (req, res) => {
+    try {
+        const { roomId } = req.body;
+        if (!roomId) {
+            return res.status(400).json({ message: "roomId is required" });
+        }
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        const newRoom = await Room.findById(roomId);
+        if (!newRoom) {
+            return res.status(404).json({ message: "Target room not found" });
+        }
+
+        const overlap = await Booking.findOne({
+            _id: { $ne: booking._id },
+            room: roomId,
+            bookingStatus: { $ne: 'cancelled' },
+            checkInDate: { $lt: booking.checkOutDate },
+            checkOutDate: { $gt: booking.checkInDate }
+        });
+        if (overlap) {
+            return res.status(409).json({ message: "Target room is not available for this booking's dates" });
+        }
+
+        const previousRoom = booking.room;
+        booking.room = roomId;
+        await booking.save();
+
+        // Free up the previous room, occupy the new one, if this booking is currently active.
+        if (booking.bookingStatus === 'checked-in') {
+            if (previousRoom) await Room.findByIdAndUpdate(previousRoom, { status: 'cleaning', currentStatus: 'cleaning' });
+            await Room.findByIdAndUpdate(roomId, { status: 'occupied', currentStatus: 'occupied', availability: false });
+        }
+
+        const populated = await Booking.findById(booking._id).populate('guest room');
+        res.json(mapBookingToClient(populated));
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Extend or shorten an existing booking's stay dates, re-validating availability & totals
+exports.updateStayDates = async (req, res) => {
+    try {
+        const { checkIn, checkOut } = req.body;
+        if (!checkIn || !checkOut) {
+            return res.status(400).json({ message: "checkIn and checkOut are required" });
+        }
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        if (isNaN(checkInDate) || isNaN(checkOutDate) || checkOutDate <= checkInDate) {
+            return res.status(400).json({ message: "Check-out date must be after check-in date" });
+        }
+
+        const booking = await Booking.findById(req.params.id).populate('room');
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        const overlap = await Booking.findOne({
+            _id: { $ne: booking._id },
+            room: booking.room?._id,
+            bookingStatus: { $ne: 'cancelled' },
+            checkInDate: { $lt: checkOutDate },
+            checkOutDate: { $gt: checkInDate }
+        });
+        if (overlap) {
+            return res.status(409).json({ message: "Room is not available for the requested dates" });
+        }
+
+        const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
+        booking.checkInDate = checkInDate;
+        booking.checkOutDate = checkOutDate;
+        if (booking.room?.price) {
+            booking.totalAmount = booking.room.price * nights;
+        }
+        await booking.save();
 
         const populated = await Booking.findById(booking._id).populate('guest room');
         res.json(mapBookingToClient(populated));

@@ -20,6 +20,16 @@ exports.getServices = async (req, res) => {
   }
 };
 
+// Public-to-guests catalog of orderable services (not tied to a specific booking)
+exports.getCatalog = async (req, res) => {
+  try {
+    const services = await Service.find({ status: "available" });
+    res.json(services);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Update service (e.g. mark completed/cancelled)
 exports.updateService = async (req, res) => {
   try {

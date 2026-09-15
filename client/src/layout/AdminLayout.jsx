@@ -14,14 +14,34 @@ import {
   Sparkles,
   CheckCircle,
   ExternalLink,
+  Users as GuestIcon,
+  CreditCard,
+  MessageSquare,
+  Tag,
+  Percent,
+  Package,
+  BarChart3,
+  Settings,
+  ShieldAlert,
+  ClipboardList,
+  ShieldCheck,
 } from '../components/common/icons';
+import NotificationBell from '../components/common/NotificationBell';
 
 const DEMO_ROLES = [
-  { role: 'admin', label: 'Admin', email: 'admin@luxurystay.com', password: 'AdminPassword123!', icon: '👑' },
+  { role: 'admin', label: 'Super Admin', email: 'admin@luxurystay.com', password: 'AdminPassword123!', icon: '👑' },
   { role: 'manager', label: 'Manager', email: 'manager@luxurystay.com', password: 'ManagerPassword123!', icon: '👔' },
   { role: 'receptionist', label: 'Receptionist', email: 'reception@luxurystay.com', password: 'StaffPassword123!', icon: '🛎️' },
   { role: 'housekeeping', label: 'Housekeeping', email: 'housekeeping@luxurystay.com', password: 'HousekeepingPass123!', icon: '🧹' },
 ];
+
+const ROLE_LABELS = {
+  admin: 'Super Admin',
+  manager: 'Manager',
+  receptionist: 'Receptionist',
+  housekeeping: 'Housekeeping',
+  guest: 'Guest',
+};
 
 const AdminLayout = () => {
   const { logout, login, user } = useAuth();
@@ -61,14 +81,80 @@ const AdminLayout = () => {
     {
       path: '/admin/housekeeping',
       icon: Sparkles,
-      label: 'Housekeeping & Care',
+      label: 'Housekeeping & Maintenance',
       allowedRoles: ['admin', 'manager', 'receptionist', 'housekeeping'],
+    },
+    {
+      path: '/admin/guests',
+      icon: GuestIcon,
+      label: 'Guest Directory (CRM)',
+      allowedRoles: ['admin', 'manager', 'receptionist'],
+    },
+    {
+      path: '/admin/payments',
+      icon: CreditCard,
+      label: 'Billing & Payments',
+      allowedRoles: ['admin', 'manager', 'receptionist'],
+    },
+    {
+      path: '/admin/inventory',
+      icon: Package,
+      label: 'Inventory & Supplies',
+      allowedRoles: ['admin', 'manager', 'housekeeping'],
+    },
+    {
+      path: '/admin/feedback',
+      icon: MessageSquare,
+      label: 'Feedback & Ratings',
+      allowedRoles: ['admin', 'manager'],
+    },
+    {
+      path: '/admin/promotions',
+      icon: Tag,
+      label: 'Promotions',
+      allowedRoles: ['admin', 'manager'],
+    },
+    {
+      path: '/admin/taxes',
+      icon: Percent,
+      label: 'Taxes',
+      allowedRoles: ['admin', 'manager'],
+    },
+    {
+      path: '/admin/reports',
+      icon: BarChart3,
+      label: 'Reports & Analytics',
+      allowedRoles: ['admin', 'manager'],
     },
     {
       path: '/admin/users',
       icon: Users,
       label: 'Staff & Guest Directory',
       allowedRoles: ['admin', 'manager'],
+    },
+    {
+      path: '/admin/roles',
+      icon: ShieldCheck,
+      label: 'Roles & Permissions',
+      allowedRoles: ['admin', 'manager'],
+    },
+    {
+      path: '/admin/settings',
+      icon: Settings,
+      label: 'System Settings',
+      allowedRoles: ['admin'],
+    },
+    {
+      path: '/admin/security',
+      icon: ShieldAlert,
+      label: 'Security Center',
+      allowedRoles: ['admin'],
+    },
+    {
+      path: '/admin/audit-logs',
+      icon: ClipboardList,
+      label: 'Audit Logs',
+      allowedRoles: ['admin'],
     },
   ];
 
@@ -149,7 +235,7 @@ const AdminLayout = () => {
             <div className="p-3 bg-[#1c1c1c] border border-[#c19c77]/25 rounded flex items-center justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-[#a89d91]">Active View</p>
-                <p className="text-sm font-serif font-bold text-[#f4ece4] capitalize">{userRole}</p>
+                <p className="text-sm font-serif font-bold text-[#f4ece4]">{ROLE_LABELS[userRole] || userRole}</p>
               </div>
               <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-[#c19c77]/20 text-[#c19c77] border border-[#c19c77]/40">
                 Live Session
@@ -234,6 +320,8 @@ const AdminLayout = () => {
               {navItems.find((n) => isActive(n.path))?.label || 'Management Portal'}
             </h1>
           </div>
+
+          <NotificationBell />
 
           {/* Fast Role Switcher for Demo / Inspection */}
           <div className="flex items-center gap-2 bg-[#f7f6f3] p-1.5 rounded border border-[#eae5de] flex-wrap">

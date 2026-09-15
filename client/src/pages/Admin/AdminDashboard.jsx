@@ -69,34 +69,40 @@ const AdminDashboard = () => {
     ? Math.round(((rooms.length - availableRoomsCount) / rooms.length) * 100)
     : 0;
 
+  // ADR (Average Daily Rate) & RevPAR (Revenue Per Available Room) - Blueprint Section 7.4
+  const adr = occupiedCount > 0 
+    ? Math.round(totalRevenue / Math.max(1, bookings.length)) 
+    : (bookings.length > 0 ? Math.round(totalRevenue / bookings.length) : 220);
+  const revPar = Math.round((adr * occupancyRate) / 100);
+
   const stats = [
     {
-      title: 'Total Revenue',
+      title: 'Gross Invoiced Revenue',
       value: `$${totalRevenue.toLocaleString()}`,
       change: `${bookings.length} reservations to date`,
       icon: DollarSign,
       color: 'text-[#c19c77] bg-[#c19c77]/10 border-[#c19c77]/30',
     },
     {
-      title: 'Active Bookings',
-      value: bookings.length,
-      change: 'Guest reservations registered',
-      icon: CalendarDays,
-      color: 'text-[#1c1c1c] bg-[#f4ece4] border-[#e7dbcd]',
-    },
-    {
       title: 'Occupancy Rate',
       value: `${occupancyRate}%`,
-      change: `${availableRoomsCount} of ${rooms.length} suites ready`,
+      change: `${availableRoomsCount} of ${rooms.length} suites vacant`,
       icon: BedDouble,
       color: 'text-[#4c7a5a] bg-[#4c7a5a]/10 border-[#4c7a5a]/25',
     },
     {
-      title: 'Registered Users',
-      value: users.length,
-      change: 'Guests and staff accounts',
+      title: 'ADR / RevPAR',
+      value: `$${adr} / $${revPar}`,
+      change: `ADR: $${adr} • RevPAR: $${revPar}`,
+      icon: TrendingUp,
+      color: 'text-[#2b6cb0] bg-[#2b6cb0]/10 border-[#2b6cb0]/25',
+    },
+    {
+      title: 'Maintenance & Care',
+      value: `${maintenanceCount} / ${cleaningCount}`,
+      change: `${maintenanceCount} Maint. • ${cleaningCount} Cleaning`,
       icon: Users,
-      color: 'text-[#5c5c5c] bg-[#f3f3f3] border-[#e2ddd5]',
+      color: 'text-[#c53030] bg-[#c53030]/10 border-[#c53030]/25',
     },
   ];
 

@@ -81,6 +81,11 @@ app.use('/api/eventbookings', require('./Routes/EventBookingRoutes'));
 app.use('/api/notifications', require('./Routes/NotificationRoutes'));
 app.use('/api/inventory', require('./Routes/InventoryRoutes'));
 app.use('/api/feedback', require('./Routes/FeedbackRoutes'));
+app.use('/api/reports', require('./Routes/ReportRoutes'));
+app.use('/api/settings', require('./Routes/SettingsRoutes'));
+app.use('/api/audit-logs', require('./Routes/AuditLogRoutes'));
+app.use('/api/security', require('./Routes/SecurityRoutes'));
+app.use('/api/servicerequests', require('./Routes/ServiceRequestRoutes'));
 app.use('/api/contact', require('./Routes/ContactRoutes'));
 app.use('/api/auth', require('./Routes/AuthRoutes'));
 

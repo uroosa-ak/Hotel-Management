@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Trash2, Shield, User, CheckCircle, XCircle } from '../../components/common/icons';
+import { Users, Trash2, Shield, User, CheckCircle, XCircle, Plus } from '../../components/common/icons';
 import userService from '../../services/userService';
+import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 
+const emptyStaffForm = { firstName: '', lastName: '', email: '', password: '', phone: '', role: 'receptionist' };
+
 const AdminUsers = () => {
+  const { isAdmin } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterRole, setFilterRole] = useState('all');
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, userId: null });
+  const [showAddStaff, setShowAddStaff] = useState(false);
+  const [staffForm, setStaffForm] = useState(emptyStaffForm);
+  const [staffError, setStaffError] = useState('');
+  const [creating, setCreating] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -45,6 +53,22 @@ const AdminUsers = () => {
     }
   };
 
+  const handleCreateStaff = async (e) => {
+    e.preventDefault();
+    setCreating(true);
+    setStaffError('');
+    try {
+      await userService.createStaff(staffForm);
+      setShowAddStaff(false);
+      setStaffForm(emptyStaffForm);
+      await fetchUsers();
+    } catch (err) {
+      setStaffError(err.message || 'Failed to create staff account');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const handleConfirmDelete = async () => {
     if (!deleteModal.userId) return;
     try {
@@ -67,6 +91,14 @@ const AdminUsers = () => {
       <PageHeader
         title="Staff & Guest Directory"
         subtitle="Manage user roles, modify staff access levels (Manager, Receptionist, Housekeeping), and activate or deactivate accounts."
+        action={
+          <button
+            onClick={() => { setStaffForm(emptyStaffForm); setStaffError(''); setShowAddStaff(true); }}
+            className="btn-accent text-xs flex items-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <Plus size={16} /> <span>Add Staff Member</span>
+          </button>
+        }
       />
 
       {/* Role filter tabs */}
@@ -172,6 +204,64 @@ const AdminUsers = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {showAddStaff && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
+            <h3 className="text-base font-bold text-slate-900 font-serif">Add Staff Member</h3>
+            {staffError && <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{staffError}</p>}
+            <form onSubmit={handleCreateStaff} className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">First Name</label>
+                  <input required className="input-field py-2" value={staffForm.firstName}
+                    onChange={(e) => setStaffForm({ ...staffForm, firstName: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">Last Name</label>
+                  <input className="input-field py-2" value={staffForm.lastName}
+                    onChange={(e) => setStaffForm({ ...staffForm, lastName: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Email</label>
+                <input type="email" required className="input-field py-2" value={staffForm.email}
+                  onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">Temporary Password</label>
+                  <input type="text" required className="input-field py-2" value={staffForm.password}
+                    onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">Phone</label>
+                  <input className="input-field py-2" value={staffForm.phone}
+                    onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Role</label>
+                <select className="input-field py-2" value={staffForm.role}
+                  onChange={(e) => setStaffForm({ ...staffForm, role: e.target.value })}>
+                  <option value="receptionist">Receptionist</option>
+                  <option value="housekeeping">Housekeeping</option>
+                  <option value="manager">Manager</option>
+                  {isAdmin && <option value="admin">Super Admin</option>}
+                </select>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button type="button" onClick={() => setShowAddStaff(false)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">
+                  Cancel
+                </button>
+                <button type="submit" disabled={creating} className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-sm disabled:opacity-60">
+                  {creating ? 'Creating...' : 'Create Account'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

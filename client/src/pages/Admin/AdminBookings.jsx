@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Trash2, CheckCircle, XCircle } from '../../components/common/icons';
+import { Calendar, Trash2, CheckCircle, XCircle, BedDouble } from '../../components/common/icons';
 import bookingService from '../../services/bookingService';
+import roomService from '../../services/roomService';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -8,8 +9,12 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [manageModal, setManageModal] = useState(null); // booking being managed
+  const [manageForm, setManageForm] = useState({ roomId: '', checkIn: '', checkOut: '' });
+  const [manageError, setManageError] = useState('');
 
   // Cancel / delete state
   const [dialogState, setDialogState] = useState({
@@ -20,8 +25,9 @@ const AdminBookings = () => {
 
   const fetchBookings = async () => {
     try {
-      const data = await bookingService.getAll();
+      const [data, roomData] = await Promise.all([bookingService.getAll(), roomService.getAll()]);
       setBookings(Array.isArray(data) ? data : []);
+      setRooms(Array.isArray(roomData) ? roomData : []);
     } catch (err) {
       console.error('Failed to load admin bookings', err);
     } finally {
@@ -32,6 +38,32 @@ const AdminBookings = () => {
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  const openManage = (b) => {
+    setManageModal(b);
+    setManageForm({ roomId: b.room?._id || '', checkIn: b.checkIn || '', checkOut: b.checkOut || '' });
+    setManageError('');
+  };
+
+  const handleReassign = async () => {
+    try {
+      await bookingService.reassignRoom(manageModal._id, manageForm.roomId);
+      setManageError('');
+      await fetchBookings();
+    } catch (err) {
+      setManageError(err.message || 'Failed to reassign room');
+    }
+  };
+
+  const handleUpdateDates = async () => {
+    try {
+      await bookingService.updateDates(manageModal._id, manageForm.checkIn, manageForm.checkOut);
+      setManageModal(null);
+      await fetchBookings();
+    } catch (err) {
+      setManageError(err.message || 'Failed to update stay dates');
+    }
+  };
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -148,6 +180,13 @@ const AdminBookings = () => {
                           <option value="cancelled">Cancelled</option>
                         </select>
                         <button
+                          onClick={() => openManage(b)}
+                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                          title="Reassign Room / Extend Stay"
+                        >
+                          <BedDouble size={15} />
+                        </button>
+                        <button
                           onClick={() =>
                             setDialogState({ isOpen: true, type: 'delete', bookingId: b._id })
                           }
@@ -162,6 +201,56 @@ const AdminBookings = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {manageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
+            <h3 className="text-base font-bold text-slate-900 font-serif">
+              Manage Reservation {manageModal._id.slice(-6).toUpperCase()}
+            </h3>
+            {manageError && <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{manageError}</p>}
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Reassign Room</label>
+                <div className="flex gap-2">
+                  <select
+                    className="input-field py-2 flex-1"
+                    value={manageForm.roomId}
+                    onChange={(e) => setManageForm({ ...manageForm, roomId: e.target.value })}
+                  >
+                    {rooms.map((r) => (
+                      <option key={r._id} value={r._id}>Room {r.roomNumber} — {r.roomType}</option>
+                    ))}
+                  </select>
+                  <button onClick={handleReassign} className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold cursor-pointer">
+                    Reassign
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Extend / Shorten Stay</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="date" className="input-field py-2" value={manageForm.checkIn}
+                    onChange={(e) => setManageForm({ ...manageForm, checkIn: e.target.value })} />
+                  <input type="date" className="input-field py-2" value={manageForm.checkOut}
+                    onChange={(e) => setManageForm({ ...manageForm, checkOut: e.target.value })} />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button onClick={() => setManageModal(null)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">
+                Close
+              </button>
+              <button onClick={handleUpdateDates} className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm">
+                Save Dates
+              </button>
+            </div>
           </div>
         </div>
       )}

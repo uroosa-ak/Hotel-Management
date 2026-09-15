@@ -12,6 +12,7 @@ router.put("/profile", authMiddleware, userController.updateUser);
 router.put("/change-password", authMiddleware, userController.changePassword);
 
 // Staff & User Management (Admin & Manager only)
+router.post("/staff", authMiddleware, authorizeRoles("admin", "manager"), userController.createStaff);
 router.get("/all", authMiddleware, authorizeRoles("admin", "manager"), userController.getUsers);
 router.put("/:id", authMiddleware, authorizeRoles("admin", "manager"), userController.updateUser);
 router.patch("/:id/toggle-status", authMiddleware, authorizeRoles("admin", "manager"), userController.toggleUserStatus);

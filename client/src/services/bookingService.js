@@ -36,6 +36,16 @@ const bookingService = {
     return data;
   },
 
+  reassignRoom: async (id, roomId) => {
+    const { data } = await api.patch(`/booking/${id}/reassign-room`, { roomId });
+    return data;
+  },
+
+  updateDates: async (id, checkIn, checkOut) => {
+    const { data } = await api.patch(`/booking/${id}/dates`, { checkIn, checkOut });
+    return data;
+  },
+
   delete: async (id) => {
     const { data } = await api.delete(`/booking/${id}`);
     return data;
