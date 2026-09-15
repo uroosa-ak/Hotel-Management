@@ -374,7 +374,7 @@ const MyBookings = () => {
                       <p className="text-[11px] text-slate-500 mt-0.5">{item.desc}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="font-bold text-slate-900 font-serif text-sm">${item.price}</span>
+                      <span className="font-bold text-slate-900 font-serif text-sm">PKR {item.price}</span>
                       <button
                         onClick={() => handleOrderDiningItem(item)}
                         className="px-3 py-1.5 bg-[#c19c77] hover:bg-[#b08b66] text-white rounded-lg text-xs font-semibold cursor-pointer shadow-xs"

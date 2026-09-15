@@ -115,7 +115,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Pre-save hook: sync name and hash password safely
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   if (this.firstName || this.lastName) {
     if (!this.name || this.name.trim() === '') {
       this.name = `${this.firstName || ''} ${this.lastName || ''}`.trim();
@@ -127,17 +127,16 @@ userSchema.pre('save', async function (next) {
   }
 
   // Only hash password if modified and not already hashed
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password')) return;
   if (
     typeof this.password === 'string' &&
     (this.password.startsWith('$2a$') || this.password.startsWith('$2b$'))
   ) {
-    return next();
+    return;
   }
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 // Instance method to verify password

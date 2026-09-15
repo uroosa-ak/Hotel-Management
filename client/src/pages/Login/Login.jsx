@@ -3,14 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { validateEmail } from '../../utils/validators';
 
-const DEMO_ACCOUNTS = [
-  { label: 'Guest', email: 'guest@luxurystay.com', password: 'GuestPassword123!' },
-  { label: 'Housekeeping', email: 'housekeeping@luxurystay.com', password: 'HousekeepingPass123!' },
-  { label: 'Receptionist', email: 'reception@luxurystay.com', password: 'StaffPassword123!' },
-  { label: 'Manager', email: 'manager@luxurystay.com', password: 'ManagerPassword123!' },
-  { label: 'Admin', email: 'admin@luxurystay.com', password: 'AdminPassword123!' },
-];
-
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -53,11 +45,6 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     handleLoginSubmit(formData);
-  };
-
-  const handleDemoLogin = (account) => {
-    setFormData({ email: account.email, password: account.password });
-    handleLoginSubmit({ email: account.email, password: account.password });
   };
 
   return (
@@ -135,24 +122,6 @@ const Login = () => {
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
-
-          <div style={{ marginTop: 28, paddingTop: 22, borderTop: '1px solid #eee' }}>
-            <p className="motela-eyebrow" style={{ textAlign: 'center', marginBottom: 14 }}>
-              Demo accounts
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-              {DEMO_ACCOUNTS.map((account) => (
-                <button
-                  key={account.email}
-                  type="button"
-                  className="motela-chip"
-                  onClick={() => handleDemoLogin(account)}
-                >
-                  {account.label}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         <p className="motela-text" style={{ textAlign: 'center', marginTop: 24, fontSize: 14 }}>

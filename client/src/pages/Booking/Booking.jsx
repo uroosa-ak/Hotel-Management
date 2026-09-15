@@ -157,7 +157,7 @@ const Booking = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Total (room charge):</span>
-                <span className="font-bold text-accent">${bookingSuccess.totalAmount}</span>
+                <span className="font-bold text-accent">PKR {bookingSuccess.totalAmount}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Status:</span>
@@ -377,7 +377,7 @@ const Booking = () => {
                         {room.type}
                       </span>
                       <h4 className="font-bold text-slate-900 text-sm line-clamp-1">{room.name}</h4>
-                      <p className="text-xs text-slate-500">${room.pricePerNight} / night</p>
+                      <p className="text-xs text-slate-500">PKR {room.pricePerNight} / night</p>
                     </div>
                   </div>
                 )}
@@ -386,24 +386,24 @@ const Booking = () => {
                 <div className="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-600">
                   <div className="flex justify-between">
                     <span>
-                      ${room?.pricePerNight || 0} × {pricing.nights} night(s)
+                      PKR {room?.pricePerNight || 0} × {pricing.nights} night(s)
                     </span>
-                    <span className="font-semibold text-slate-900">${pricing.roomTotal}</span>
+                    <span className="font-semibold text-slate-900">PKR {pricing.roomTotal}</span>
                   </div>
 
                   <div className="flex justify-between">
                     <span>Resort & Amenities Fee</span>
-                    <span className="font-semibold text-slate-900">${pricing.resortFee}</span>
+                    <span className="font-semibold text-slate-900">PKR {pricing.resortFee}</span>
                   </div>
 
                   <div className="flex justify-between">
                     <span>State & Luxury Taxes (12%)</span>
-                    <span className="font-semibold text-slate-900">${pricing.taxes}</span>
+                    <span className="font-semibold text-slate-900">PKR {pricing.taxes}</span>
                   </div>
 
                   <div className="flex justify-between text-base font-bold text-slate-900 pt-3 border-t border-slate-100">
                     <span>Total Amount</span>
-                    <span className="text-amber-600 text-xl font-serif">${pricing.total}</span>
+                    <span className="text-amber-600 text-xl font-serif">PKR {pricing.total}</span>
                   </div>
                 </div>
 

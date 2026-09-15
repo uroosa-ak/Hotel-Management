@@ -66,6 +66,7 @@ import {
   LuClipboardList as ClipboardList,
   LuChartBar as BarChart3,
   LuShieldAlert as ShieldAlert,
+  LuCircleAlert as AlertCircle,
 } from 'react-icons/lu';
 
 export {
@@ -136,4 +137,5 @@ export {
   ClipboardList,
   BarChart3,
   ShieldAlert,
+  AlertCircle,
 };

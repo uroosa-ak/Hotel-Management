@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function runScript(script) {
@@ -20,14 +20,29 @@ function runScript(script) {
 }
 
 /**
- * Renders a scraped WordPress/Elementor page with full fidelity,
- * replays its scripts so sliders/menus/accordions/forms function as intended,
- * intercepts internal links for instant client-side routing,
- * and intercepts the booking search form to connect with the MERN booking engine.
+ * Sanitizes scraped legacy WordPress HTML by stripping out old duplicate
+ * headers/footers and standardizing branding & currency ($ -> PKR).
  */
+function sanitizeLegacyHtml(rawHtml) {
+  if (!rawHtml) return '';
+  return rawHtml
+    // Remove scraped template header and footer so React's unified header & footer are used
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    // Standardize brand names
+    .replace(/MOTELA/gi, 'LuxuryStay')
+    .replace(/Motela/g, 'LuxuryStay')
+    // Standardize currency: replace $ 30, $30, $ 120, etc. with PKR 30, PKR 120
+    .replace(/\$\s*([0-9]+)/g, 'PKR $1')
+    .replace(/<h3 class="elementor-heading-title elementor-size-default">\$\s*<\/h3>/gi, '<h3 class="elementor-heading-title elementor-size-default">PKR </h3>')
+    .replace(/&#36;/g, 'PKR ');
+}
+
 export default function LegacyPage({ html, scripts = [], bodyClass = '' }) {
   const containerRef = useRef(null);
   const navigate = useNavigate();
+
+  const cleanedHtml = useMemo(() => sanitizeLegacyHtml(html), [html]);
 
   useEffect(() => {
     const previousBodyClass = document.body.className;
@@ -127,5 +142,5 @@ export default function LegacyPage({ html, scripts = [], bodyClass = '' }) {
     };
   }, [navigate]);
 
-  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: cleanedHtml }} />;
 }

@@ -100,7 +100,7 @@ const Rooms = () => {
                           Suite #{room.roomNumber}
                         </div>
                         <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-xs text-slate-900 px-3 py-1 rounded-full text-xs font-bold font-serif shadow-md">
-                          ${price} <span className="text-[10px] text-slate-500 font-normal font-sans">/ night</span>
+                          PKR {price} <span className="text-[10px] text-slate-500 font-normal font-sans">/ night</span>
                         </div>
                       </div>
 

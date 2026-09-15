@@ -112,7 +112,7 @@ const AdminReports = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <StatCard label="Occupancy Rate" value={`${data.occupancy?.occupancyRate ?? 0}%`} />
-            <StatCard label="Total Revenue" value={`$${(data.revenue?.totalRevenue ?? 0).toFixed(2)}`} />
+            <StatCard label="Total Revenue" value={`PKR ${(data.revenue?.totalRevenue ?? 0).toLocaleString()}`} />
             <StatCard label="Total Bookings" value={data.revenue?.bookingCount ?? 0} />
             <StatCard label="Avg. Rating" value={data.feedback?.avgRating ?? 0} />
           </div>

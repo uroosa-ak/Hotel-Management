@@ -1,11 +1,13 @@
 const Invoice = require('../models/Invoice');
 const Reservation = require('../models/Reservation');
 const Booking = require('../models/Booking');
+const User = require('../models/User');
 const { notifyUser } = require('../utils/notify');
+const { sendEmail } = require('../utils/emailService');
+const { generateInvoiceEmailHtml } = require('../utils/invoiceEmailTemplate');
 
 /**
  * Billing & Folio Controller
- * Strictly conforms to Section 2, 4.4, and 6 of the Master Engineering Blueprint.
  */
 
 // Get Folio / Invoice by Reservation ID or Invoice ID
@@ -79,9 +81,9 @@ exports.settleInvoice = async (req, res) => {
     const { id } = req.params;
     const { paymentMethod = 'cash', amountPaid } = req.body;
 
-    let invoice = await Invoice.findById(id);
+    let invoice = await Invoice.findById(id).populate('guestId reservationId');
     if (!invoice) {
-      invoice = await Invoice.findOne({ reservationId: id });
+      invoice = await Invoice.findOne({ reservationId: id }).populate('guestId reservationId');
     }
     if (!invoice) {
       return res.status(404).json({ message: 'Folio / Invoice not found.' });
@@ -102,12 +104,84 @@ exports.settleInvoice = async (req, res) => {
       // Ignored if booking alias handles it
     }
 
-    notifyUser(invoice.guestId, `Payment of $${paid.toFixed(2)} received. ${invoice.balanceDue > 0 ? `Remaining balance: $${invoice.balanceDue.toFixed(2)}.` : 'Your invoice is now fully paid.'}`, "info");
+    notifyUser(
+      invoice.guestId?._id || invoice.guestId,
+      `Payment of PKR ${paid.toLocaleString('en-US', { minimumFractionDigits: 2 })} received. ${
+        invoice.balanceDue > 0
+          ? `Remaining balance: PKR ${invoice.balanceDue.toLocaleString('en-US', { minimumFractionDigits: 2 })}.`
+          : 'Your invoice is now fully paid.'
+      }`,
+      'info'
+    );
+
+    // Send invoice email asynchronously
+    try {
+      let recipientEmail = invoice.guestId?.email;
+      if (!recipientEmail && invoice.reservationId?.guestEmail) {
+        recipientEmail = invoice.reservationId.guestEmail;
+      }
+      if (recipientEmail) {
+        const html = generateInvoiceEmailHtml(invoice, invoice.guestId);
+        sendEmail({
+          to: recipientEmail,
+          subject: `Invoice #${invoice._id.toString().toUpperCase()} Settled - LuxuryStay Hospitality`,
+          html,
+        }).catch((err) => console.error('Settlement invoice email dispatch error:', err.message));
+      }
+    } catch (emailErr) {
+      console.error('Error preparing settlement email:', emailErr.message);
+    }
 
     res.json({
       success: true,
       message: 'Invoice successfully settled.',
       invoice,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Send Invoice Email to Guest (Manual trigger from Staff Portal)
+exports.sendInvoiceEmail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { recipientEmail: customEmail } = req.body || {};
+
+    let invoice = await Invoice.findById(id).populate('guestId reservationId');
+    if (!invoice) {
+      invoice = await Invoice.findOne({ reservationId: id }).populate('guestId reservationId');
+    }
+    if (!invoice) {
+      return res.status(404).json({ message: 'Folio / Invoice not found.' });
+    }
+
+    let recipientEmail = customEmail || invoice.guestId?.email;
+    if (!recipientEmail && invoice.reservationId?.guestEmail) {
+      recipientEmail = invoice.reservationId.guestEmail;
+    }
+    if (!recipientEmail) {
+      // Fallback default email provided by user if guest email is missing
+      recipientEmail = 'waqaskamboh269@gmail.com';
+    }
+
+    const html = generateInvoiceEmailHtml(invoice, invoice.guestId);
+    const result = await sendEmail({
+      to: recipientEmail,
+      subject: `Official Folio Statement #${invoice._id.toString().toUpperCase()} - LuxuryStay Hospitality`,
+      html,
+    });
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        message: `Failed to send email to ${recipientEmail}: ${result.error}`,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Invoice email successfully sent to ${recipientEmail}`,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

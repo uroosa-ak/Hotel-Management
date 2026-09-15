@@ -135,7 +135,7 @@ const RoomDetail = () => {
             <aside className="motela-panel" style={{ position: 'sticky', top: 30 }}>
               <p className="motela-eyebrow">Nightly rate</p>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 20 }}>
-                <span className="motela-title" style={{ fontSize: 38 }}>${price}</span>
+                <span className="motela-title" style={{ fontSize: 32 }}>PKR {price}</span>
                 <span className="motela-text" style={{ fontSize: 14 }}>/ night</span>
               </div>
 

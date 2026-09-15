@@ -27,6 +27,7 @@ import {
   ShieldCheck,
 } from '../components/common/icons';
 import NotificationBell from '../components/common/NotificationBell';
+import BrandLogo from '../components/common/BrandLogo';
 
 const DEMO_ROLES = [
   { role: 'admin', label: 'Super Admin', email: 'admin@luxurystay.com', password: 'AdminPassword123!', icon: '👑' },
@@ -182,14 +183,7 @@ const AdminLayout = () => {
     <div className="app-shell min-h-screen flex bg-[#f7f6f3]" style={{ fontFamily: "'Jost', sans-serif" }}>
       {/* Mobile Top Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[#161616] text-white px-5 h-16 flex items-center justify-between shadow-lg border-b border-[#c19c77]/20">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-[#c19c77]/15 rounded text-[#c19c77]">
-            <Shield size={18} />
-          </div>
-          <span className="font-serif font-bold text-sm tracking-widest text-[#d6cbbf] uppercase">
-            LuxuryStay <span className="text-[#c19c77] font-sans font-normal text-xs">Portal</span>
-          </span>
-        </div>
+        <BrandLogo variant="dark" size="sm" />
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-2 text-[#d6cbbf] hover:text-white rounded cursor-pointer"
@@ -208,19 +202,7 @@ const AdminLayout = () => {
         <div>
           {/* Brand Header */}
           <div className="p-6 border-b border-[#c19c77]/15 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3.5 group">
-              <div className="p-2.5 bg-gradient-to-br from-[#c19c77] to-[#8c6f50] rounded-sm text-white shadow-md shadow-[#c19c77]/20 group-hover:scale-105 transition-transform">
-                <Shield size={22} />
-              </div>
-              <div>
-                <h2 className="text-base font-serif font-semibold text-[#f4ece4] tracking-wide">
-                  LuxuryStay
-                </h2>
-                <p className="text-[11px] text-[#c19c77] tracking-widest uppercase font-medium">
-                  Staff Management
-                </p>
-              </div>
-            </Link>
+            <BrandLogo variant="dark" size="md" />
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden text-[#a89d91] hover:text-white"
@@ -322,33 +304,6 @@ const AdminLayout = () => {
           </div>
 
           <NotificationBell />
-
-          {/* Fast Role Switcher for Demo / Inspection */}
-          <div className="flex items-center gap-2 bg-[#f7f6f3] p-1.5 rounded border border-[#eae5de] flex-wrap">
-            <span className="text-[11px] font-semibold text-[#736d65] uppercase tracking-wider px-2">
-              Role Switcher:
-            </span>
-            {DEMO_ROLES.map((demo) => {
-              const isCurrent = userRole === demo.role;
-              return (
-                <button
-                  key={demo.role}
-                  type="button"
-                  disabled={switchingRole}
-                  onClick={() => handleQuickRoleSwitch(demo)}
-                  className={`px-3 py-1 text-xs rounded transition-all cursor-pointer flex items-center gap-1.5 font-medium ${
-                    isCurrent
-                      ? 'bg-[#c19c77] text-white shadow-xs font-semibold'
-                      : 'bg-white text-[#5c5c5c] hover:text-[#1c1c1c] hover:bg-[#ede9e2] border border-[#e2ddd5]'
-                  }`}
-                  title={`Switch to ${demo.label} (${demo.email})`}
-                >
-                  <span>{demo.icon}</span>
-                  <span>{demo.label}</span>
-                </button>
-              );
-            })}
-          </div>
         </header>
 
         {/* Page View */}

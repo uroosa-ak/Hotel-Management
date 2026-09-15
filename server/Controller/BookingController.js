@@ -135,7 +135,7 @@ exports.createBooking = async (req, res) => {
         // Auto-generate itemized folio invoice matching Blueprint Section 4.4 & 6
         try {
             const Invoice = require('../models/Invoice');
-            await Invoice.create({
+            const createdInvoice = await Invoice.create({
                 reservationId: booking._id,
                 guestId: req.user?._id || guestDoc._id,
                 lineItems: [{
@@ -151,6 +151,19 @@ exports.createBooking = async (req, res) => {
                 balanceDue: totalAmount,
                 paymentStatus: 'pending'
             });
+
+            // Send HTML invoice email directly to guest email
+            const targetEmail = guestDoc.email || req.user?.email;
+            if (targetEmail) {
+                const { sendEmail } = require('../utils/emailService');
+                const { generateInvoiceEmailHtml } = require('../utils/invoiceEmailTemplate');
+                const html = generateInvoiceEmailHtml(createdInvoice, guestDoc || req.user);
+                sendEmail({
+                    to: targetEmail,
+                    subject: `Reservation & Invoice Confirmation - Room ${roomDoc.roomNumber} (LuxuryStay)`,
+                    html
+                }).catch((eErr) => console.error('Booking confirmation email error:', eErr.message));
+            }
         } catch (invErr) {
             // Safe fallback if invoice fails
         }

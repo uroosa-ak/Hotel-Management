@@ -78,7 +78,7 @@ const AdminDashboard = () => {
   const stats = [
     {
       title: 'Gross Invoiced Revenue',
-      value: `$${totalRevenue.toLocaleString()}`,
+      value: `PKR ${totalRevenue.toLocaleString()}`,
       change: `${bookings.length} reservations to date`,
       icon: DollarSign,
       color: 'text-[#c19c77] bg-[#c19c77]/10 border-[#c19c77]/30',
@@ -92,8 +92,8 @@ const AdminDashboard = () => {
     },
     {
       title: 'ADR / RevPAR',
-      value: `$${adr} / $${revPar}`,
-      change: `ADR: $${adr} • RevPAR: $${revPar}`,
+      value: `PKR ${adr.toLocaleString()} / PKR ${revPar.toLocaleString()}`,
+      change: `ADR: PKR ${adr.toLocaleString()} • RevPAR: PKR ${revPar.toLocaleString()}`,
       icon: TrendingUp,
       color: 'text-[#2b6cb0] bg-[#2b6cb0]/10 border-[#2b6cb0]/25',
     },

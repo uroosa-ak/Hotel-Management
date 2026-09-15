@@ -177,8 +177,8 @@ const AdminRooms = () => {
                     </td>
                     <td className="px-6 py-4">{room.type}</td>
                     <td className="px-6 py-4">{room.capacity} Guests</td>
-                    <td className="px-6 py-4 font-bold text-amber-600">
-                      ${room.pricePerNight}
+                    <td className="px-6 py-4 font-bold text-amber-600 font-mono">
+                      PKR {room.pricePerNight}
                     </td>
                     <td className="px-6 py-4">
                       <StatusBadge status={room.isAvailable ? 'available' : 'unavailable'} />
@@ -265,7 +265,7 @@ const AdminRooms = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Price / Night ($) *</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Price / Night (PKR) *</label>
                   <input
                     type="number"
                     required

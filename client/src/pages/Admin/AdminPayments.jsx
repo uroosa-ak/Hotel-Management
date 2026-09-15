@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, FileText, DollarSign } from '../../components/common/icons';
+import { CreditCard, FileText, Printer, Mail } from '../../components/common/icons';
 import paymentService from '../../services/paymentService';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import PrintableInvoice from '../../components/common/PrintableInvoice';
 
 const AdminPayments = () => {
   const [tab, setTab] = useState('invoices'); // invoices | payments
@@ -12,6 +13,7 @@ const AdminPayments = () => {
   const [loading, setLoading] = useState(true);
   const [settleModal, setSettleModal] = useState(null); // invoice object
   const [settleForm, setSettleForm] = useState({ amountPaid: '', paymentMethod: 'cash' });
+  const [printInvoiceModal, setPrintInvoiceModal] = useState(null);
 
   const fetchAll = async () => {
     try {
@@ -60,10 +62,10 @@ const AdminPayments = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       <PageHeader
         title="Billing & Payments"
-        subtitle="Review guest folios, settle balances, and manage payments & refunds."
+        subtitle="Review guest folios, settle balances, send email invoices, and print official bills."
       />
 
       <div className="flex gap-2 border-b border-slate-200 pb-3">
@@ -108,16 +110,30 @@ const AdminPayments = () => {
                   </td></tr>
                 ) : invoices.map((inv) => (
                   <tr key={inv._id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-mono font-semibold text-slate-900">{inv.invoiceNumber}</td>
-                    <td className="px-6 py-4">{inv.guestId?.firstName || inv.guestId?.username || 'Guest'}</td>
-                    <td className="px-6 py-4 font-semibold">${inv.grandTotal?.toFixed(2)}</td>
-                    <td className="px-6 py-4 font-semibold text-rose-700">${inv.balanceDue?.toFixed(2)}</td>
+                    <td className="px-6 py-4 font-mono font-semibold text-slate-900">{inv.invoiceNumber || inv._id?.slice(-6).toUpperCase()}</td>
+                    <td className="px-6 py-4 font-medium text-slate-900">
+                      {inv.guestId?.firstName || inv.guestId?.name || inv.guestId?.username || 'Guest'}
+                    </td>
+                    <td className="px-6 py-4 font-semibold font-mono text-slate-900">
+                      PKR {inv.grandTotal?.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 font-semibold font-mono text-rose-700">
+                      PKR {inv.balanceDue?.toLocaleString()}
+                    </td>
                     <td className="px-6 py-4"><StatusBadge status={inv.paymentStatus} /></td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <button
+                        onClick={() => setPrintInvoiceModal(inv)}
+                        className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 border border-amber-500/30 rounded-xl text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                        title="View and print invoice"
+                      >
+                        <Printer size={13} />
+                        <span>Print / Email</span>
+                      </button>
                       {inv.balanceDue > 0 && (
                         <button
                           onClick={() => openSettle(inv)}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold cursor-pointer"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold cursor-pointer shadow-xs"
                         >
                           Settle
                         </button>
@@ -146,14 +162,16 @@ const AdminPayments = () => {
               <tbody className="divide-y divide-slate-100">
                 {payments.length === 0 ? (
                   <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400">
-                    <DollarSign size={28} className="mx-auto mb-2 text-slate-300" />No payment records found.
+                    <CreditCard size={28} className="mx-auto mb-2 text-slate-300" />No payment records found.
                   </td></tr>
                 ) : payments.map((p) => (
                   <tr key={p._id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-semibold">${p.amount?.toFixed(2)}</td>
+                    <td className="px-6 py-4 font-semibold font-mono text-slate-900">
+                      PKR {p.amount?.toLocaleString()}
+                    </td>
                     <td className="px-6 py-4 capitalize">{p.paymentMethod?.replace('-', ' ')}</td>
                     <td className="px-6 py-4 font-mono text-[11px]">{p.transactionId || '—'}</td>
-                    <td className="px-6 py-4">{new Date(p.paymentDate).toLocaleDateString()}</td>
+                    <td className="px-6 py-4">{new Date(p.paymentDate || p.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4"><StatusBadge status={p.paymentStatus} /></td>
                     <td className="px-6 py-4 text-right">
                       {p.paymentStatus === 'completed' && (
@@ -173,16 +191,17 @@ const AdminPayments = () => {
         </div>
       )}
 
+      {/* Settle Modal */}
       {settleModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
             <h3 className="text-base font-bold text-slate-900 font-serif flex items-center gap-2">
-              <CreditCard size={18} /> Settle Invoice {settleModal.invoiceNumber}
+              <CreditCard size={18} className="text-amber-600" /> Settle Invoice #{settleModal.invoiceNumber || settleModal._id?.slice(-6).toUpperCase()}
             </h3>
             <form onSubmit={handleSettle} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Amount Received</label>
-                <input type="number" step="0.01" min="0" required className="input-field py-2"
+                <label className="block text-slate-700 font-semibold mb-1">Amount Received (PKR)</label>
+                <input type="number" step="0.01" min="0" required className="input-field py-2 font-mono"
                   value={settleForm.amountPaid}
                   onChange={(e) => setSettleForm({ ...settleForm, amountPaid: e.target.value })} />
               </div>
@@ -198,12 +217,20 @@ const AdminPayments = () => {
                 </select>
               </div>
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setSettleModal(null)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
-                <button type="submit" className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-sm">Confirm Payment</button>
+                <button type="button" onClick={() => setSettleModal(null)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl cursor-pointer">Cancel</button>
+                <button type="submit" className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-sm cursor-pointer">Confirm & Send Email</button>
               </div>
             </form>
           </div>
         </div>
+      )}
+
+      {/* Printable Invoice Modal */}
+      {printInvoiceModal && (
+        <PrintableInvoice
+          invoice={printInvoiceModal}
+          onClose={() => setPrintInvoiceModal(null)}
+        />
       )}
     </div>
   );

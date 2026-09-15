@@ -17,5 +17,6 @@ router.get('/invoices', authorizeRoles('admin', 'manager', 'receptionist'), bill
 router.get('/invoices/:id', billingController.getInvoice);
 router.post('/invoices/:id/add-charge', authorizeRoles('admin', 'manager', 'receptionist'), billingController.addCharge);
 router.post('/invoices/:id/settle', authorizeRoles('admin', 'manager', 'receptionist'), billingController.settleInvoice);
+router.post('/invoices/:id/send-email', authorizeRoles('admin', 'manager', 'receptionist'), billingController.sendInvoiceEmail);
 
 module.exports = router;

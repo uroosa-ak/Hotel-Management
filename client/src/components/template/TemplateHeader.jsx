@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import BrandLogo from '../common/BrandLogo';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -136,10 +137,7 @@ const TemplateHeader = () => {
       >
         <div className="elementor-element elementor-element-d3ed2b5 e-con-full e-flex e-con e-child" data-element_type="container">
           <div className="elementor-element elementor-element-85b0f12 elementor-widget" data-element_type="widget">
-            <Link to="/" className="motela-logo" aria-label="LuxuryStay Hospitality home">
-              <span className="motela-logo__name">LuxuryStay</span>
-              <span className="motela-logo__tagline">Hospitality</span>
-            </Link>
+            <BrandLogo variant="light" size="md" />
           </div>
         </div>
 

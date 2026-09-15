@@ -12,6 +12,8 @@ import {
   Sparkles,
 } from '../common/icons';
 
+import BrandLogo from '../common/BrandLogo';
+
 const Navbar = () => {
   const { user, logout, isAuthenticated, isAdmin, isStaff } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -47,22 +49,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Brand Logo */}
-          <Link
-            to="/"
-            className="flex items-center gap-3 group focus:outline-none"
-          >
-            <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl group-hover:bg-amber-500/20 transition-colors">
-              <BedDouble className="text-amber-400" size={26} />
-            </div>
-            <div>
-              <span className="text-xl font-bold tracking-wider text-white uppercase font-serif">
-                LuxuryStay
-              </span>
-              <span className="block text-[10px] tracking-widest text-amber-400 uppercase font-semibold">
-                Hospitality
-              </span>
-            </div>
-          </Link>
+          <BrandLogo variant="dark" size="md" />
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-1">
